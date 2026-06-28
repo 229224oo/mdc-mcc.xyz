@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDC · 第四生态暴富机制 | MDC 遇见社区</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #06080d;
+      --teal: #2dd4bf;
+      --emerald: #10b981;
+      --gold: #f5c451;
+      --gold-soft: #ffe49b;
+      --ink: #e6edf3;
+      --muted: #8a93a6;
+      --line: rgba(255,255,255,0.08);
+      --glass: linear-gradient(160deg, rgba(20,28,40,0.78), rgba(10,15,24,0.86));
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+      color: var(--ink);
+      line-height: 1.75;
+      background:
+        radial-gradient(ellipse at 15% 0%, rgba(45,212,191,0.12) 0%, transparent 42%),
+        radial-gradient(ellipse at 88% 8%, rgba(245,196,81,0.10) 0%, transparent 44%),
+        radial-gradient(ellipse at 50% 100%, rgba(16,185,129,0.10) 0%, transparent 48%),
+        linear-gradient(160deg, #06080d 0%, #0a1018 45%, #070b12 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+    /* 导航 */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px;
+      background: linear-gradient(180deg, rgba(8,11,18,0.92), rgba(8,11,18,0.6));
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 18px; letter-spacing: .5px; }
+    .brand .mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: #04130f; font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      box-shadow: 0 6px 18px rgba(45,212,191,0.35);
+    }
+    .brand .grad { background: linear-gradient(120deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-actions { display: flex; align-items: center; gap: 9px; }
+    .nlink {
+      padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      text-decoration: none; color: #cbd5e1; border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04); transition: all .2s; white-space: nowrap;
+    }
+    .nlink:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-wallet {
+      padding: 10px 18px; border-radius: 11px; font-size: 13px; font-weight: 800; cursor: pointer;
+      border: none; color: #04130f;
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      box-shadow: 0 6px 20px rgba(45,212,191,0.35);
+      transition: all .2s; white-space: nowrap;
+    }
+    .btn-wallet:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(45,212,191,0.5); }
+    .btn-wallet.connected { background: linear-gradient(135deg, #1f2a3a, #131a26); color: var(--teal); border: 1px solid rgba(45,212,191,0.4); font-family: monospace; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 70px 20px 40px; }
+    .eyebrow {
+      display: inline-block; font-size: 12px; letter-spacing: 4px; color: var(--gold);
+      padding: 6px 18px; border: 1px solid rgba(245,196,81,0.4); border-radius: 30px; margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 9vw, 84px); font-weight: 900; line-height: 1.02; letter-spacing: 2px;
+      background: linear-gradient(120deg, #d9fff4 0%, var(--teal) 40%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 8px 40px rgba(45,212,191,0.3));
+    }
+    .hero .slogan { font-size: clamp(18px, 3.6vw, 30px); font-weight: 800; margin: 14px 0 6px; letter-spacing: 6px; color: #fff; }
+    .hero .sub { font-size: clamp(14px, 2.4vw, 17px); color: var(--muted); max-width: 620px; margin: 14px auto 30px; }
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .cta {
+      padding: 15px 30px; border-radius: 13px; font-size: 15px; font-weight: 800; cursor: pointer;
+      border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all .25s;
+    }
+    .cta-gold { color: #1a1304; background: linear-gradient(135deg, var(--gold), #f0a93a); box-shadow: 0 8px 26px rgba(245,196,81,0.4); }
+    .cta-gold:hover { transform: translateY(-3px); box-shadow: 0 12px 34px rgba(245,196,81,0.55); }
+    .cta-ghost { color: var(--teal); border: 1px solid rgba(45,212,191,0.5); background: rgba(45,212,191,0.08); }
+    .cta-ghost:hover { background: rgba(45,212,191,0.16); transform: translateY(-3px); }
+
+    .hero-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; max-width: 880px; margin: 46px auto 0; }
+    .hstat { padding: 20px 12px; border-radius: 16px; background: var(--glass); border: 1px solid var(--line); }
+    .hstat .v { font-size: clamp(18px,3vw,24px); font-weight: 900; background: linear-gradient(135deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hstat .l { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+    /* 通用区块 */
+    section.block { padding: 56px 0 8px; }
+    .sec-head { text-align: center; margin-bottom: 34px; }
+    .sec-tag { font-size: 12px; letter-spacing: 3px; color: var(--teal); }
+    .sec-title { font-size: clamp(24px,4.4vw,38px); font-weight: 900; margin-top: 6px; }
+    .sec-title .g { background: linear-gradient(120deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sec-desc { color: var(--muted); margin-top: 10px; font-size: 15px; }
+
+    .grid { display: grid; gap: 16px; }
+    .g2 { grid-template-columns: repeat(2,1fr); }
+    .g3 { grid-template-columns: repeat(3,1fr); }
+    .g4 { grid-template-columns: repeat(4,1fr); }
+
+    .card {
+      background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 24px 22px;
+      transition: transform .25s, border-color .25s;
+    }
+    .card:hover { transform: translateY(-5px); border-color: rgba(45,212,191,0.35); }
+    .card .ic { font-size: 26px; margin-bottom: 10px; }
+    .card .ct { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 7px; }
+    .card .cd { font-size: 13.5px; color: #aeb7c7; line-height: 1.75; }
+    .card .cd b { color: var(--gold); }
+
+    /* 股东板块 */
+    .shareholder {
+      position: relative; margin: 24px 0; padding: 44px 30px; border-radius: 26px; overflow: hidden;
+      background:
+        radial-gradient(ellipse at 80% 0%, rgba(245,196,81,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 0% 100%, rgba(45,212,191,0.16) 0%, transparent 55%),
+        linear-gradient(150deg, rgba(20,28,40,0.92), rgba(9,14,22,0.95));
+      border: 1px solid rgba(245,196,81,0.35);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+    }
+    .sh-badge { display: inline-block; font-size: 12px; letter-spacing: 3px; color: var(--gold); padding: 6px 16px; border: 1px solid rgba(245,196,81,0.5); border-radius: 24px; }
+    .sh-title { font-size: clamp(26px,5vw,44px); font-weight: 900; margin: 16px 0 6px; }
+    .sh-title .g { background: linear-gradient(120deg, var(--gold), var(--gold-soft)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sh-price { font-size: clamp(15px,2.6vw,19px); color: #d6deea; margin-bottom: 26px; }
+    .sh-price b { color: var(--gold); font-size: 1.25em; }
+
+    .benefits { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 30px; }
+    .benefit {
+      display: flex; gap: 14px; padding: 20px; border-radius: 16px;
+      background: rgba(0,0,0,0.28); border: 1px solid rgba(245,196,81,0.18);
+    }
+    .benefit .bi {
+      flex-shrink: 0; width: 46px; height: 46px; border-radius: 13px; font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(245,196,81,0.22), rgba(45,212,191,0.16));
+      border: 1px solid rgba(245,196,81,0.3);
+    }
+    .benefit .bt { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+    .benefit .bd { font-size: 13px; color: #b6bfd0; line-height: 1.7; }
+
+    .sh-action { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .btn-share {
+      width: 100%; max-width: 480px; padding: 20px; border-radius: 16px; border: none; cursor: pointer;
+      font-size: 18px; font-weight: 900; letter-spacing: 1px; color: #1a1304;
+      background: linear-gradient(135deg, var(--gold) 0%, #f0a93a 60%, var(--gold) 100%);
+      box-shadow: 0 12px 36px rgba(245,196,81,0.45); transition: all .25s;
+    }
+    .btn-share:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 18px 48px rgba(245,196,81,0.6); }
+    .btn-share:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(20%); }
+    .sh-note { font-size: 12.5px; color: var(--muted); text-align: center; }
+    .addr-line {
+      display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+      font-family: monospace; font-size: 12.5px; color: var(--teal);
+      background: rgba(45,212,191,0.08); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(45,212,191,0.2);
+    }
+    .copy-mini { cursor: pointer; border: 1px solid rgba(45,212,191,0.4); background: rgba(45,212,191,0.12); color: var(--teal); font-size: 11px; padding: 3px 9px; border-radius: 7px; }
+    .copy-mini:hover { background: rgba(45,212,191,0.25); }
+
+    /* 列表/规则 */
+    ul.rules { list-style: none; }
+    ul.rules li { position: relative; padding: 9px 0 9px 26px; font-size: 14.5px; color: #c2cad8; }
+    ul.rules li::before { content: '▸'; position: absolute; left: 0; color: var(--teal); font-weight: 900; }
+    ul.rules li b { color: var(--gold); }
+
+    .pie { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    .pie-item { padding: 18px 20px; border-radius: 14px; background: rgba(0,0,0,0.26); border: 1px solid var(--line); display: flex; align-items: center; gap: 16px; }
+    .pie-pct { font-size: 26px; font-weight: 900; min-width: 70px; background: linear-gradient(135deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .pie-d .pt { font-weight: 800; color: #fff; font-size: 15px; }
+    .pie-d .pd { font-size: 12.5px; color: var(--muted); }
+
+    .step { position: relative; padding: 16px 18px 16px 56px; border-radius: 14px; background: rgba(0,0,0,0.26); border: 1px solid var(--line); margin-bottom: 12px; }
+    .step .num { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #04130f; background: linear-gradient(135deg, var(--teal), var(--emerald)); }
+    .step .st { font-weight: 800; color: #fff; font-size: 15px; }
+    .step .sd { font-size: 13px; color: #aeb7c7; }
+    .step .sd code { color: var(--teal); font-size: 12px; word-break: break-all; }
+
+    /* 社区 */
+    .community { text-align: center; margin: 30px 0; padding: 50px 24px; border-radius: 24px; background: var(--glass); border: 1px solid var(--line); }
+    .community .vis { font-size: clamp(24px,5vw,40px); font-weight: 900; letter-spacing: 4px; background: linear-gradient(120deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .community .name { color: var(--muted); margin-top: 12px; letter-spacing: 2px; }
+
+    footer { text-align: center; padding: 40px 20px 56px; color: #5d6678; font-size: 12.5px; border-top: 1px solid var(--line); margin-top: 30px; }
+
+    /* 弹窗 */
+    .modal-mask { position: fixed; inset: 0; background: rgba(3,5,9,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-mask.show { display: flex; }
+    .modal {
+      max-width: 420px; width: 100%; border-radius: 20px; padding: 30px 26px; text-align: center;
+      background: linear-gradient(160deg, #131c28, #0b121c); border: 1px solid rgba(45,212,191,0.3);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    }
+    .modal .m-ic { font-size: 44px; margin-bottom: 12px; }
+    .modal .m-title { font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .modal .m-text { font-size: 14px; color: #b6bfd0; line-height: 1.8; word-break: break-word; }
+    .modal .m-text a { color: var(--teal); }
+    .modal .m-btn { margin-top: 22px; padding: 12px 28px; border-radius: 11px; border: none; cursor: pointer; font-weight: 800; color: #04130f; background: linear-gradient(135deg, var(--teal), var(--emerald)); }
+
+    @media (max-width: 760px) {
+      .g3, .g4, .benefits, .pie { grid-template-columns: 1fr; }
+      .hero-stats { grid-template-columns: repeat(2,1fr); }
+      .nlink { display: none; }
+      .nav-actions .nlink.keep { display: inline-block; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航 -->
+  <nav class="nav">
+    <div class="brand"><span class="mark">M</span><span>MMC<span class="grad"> · 遇见</span></span></div>
+    <div class="nav-actions">
+      <a class="nlink" href="mmc-whitepaper.html">📖 白皮书</a>
+      <a class="nlink" href="mmc-ppt.html">🎓 课件</a>
+      <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">连接钱包</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero wrap">
+    <span class="eyebrow">MDC 全球最新 · 第四生态</span>
+    <h1>MDC 第四生态 · 暴富机制</h1>
+    <div class="slogan">遇见造化 · 我命由我</div>
+    <p class="sub">通缩为核 · LP 挖矿产出 · 只能卖不能买。MMC 链上持续销毁，流通量缩减到极致，稀缺即价值。</p>
+    <div class="hero-cta">
+      <a class="cta cta-gold" href="#shareholder">🚀 成为股东</a>
+      <a class="cta cta-ghost" href="mmc-ppt.html">🎓 课件</a>
+      <a class="cta cta-ghost" href="#mechanism">了解机制</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="v">100 万枚</div><div class="l">发行总量</div></div>
+      <div class="hstat"><div class="v">每日 2%</div><div class="l">LP 底池通缩</div></div>
+      <div class="hstat"><div class="v">只能卖</div><div class="l">唯 LP 挖矿产出</div></div>
+      <div class="hstat"><div class="v">122 TH/s</div><div class="l">矿机算力凭证</div></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- 股东招募 -->
+    <section class="block" id="shareholder">
+      <div class="shareholder">
+        <div style="text-align:center;">
+          <span class="sh-badge">SHAREHOLDER · 创世股东招募</span>
+          <div class="sh-title">成为 <span class="g">MMC 创世股东</span></div>
+          <div class="sh-price">仅需 <b>500 USDT</b> / 份 · 全部加进底池 · 每个地址限购一份</div>
+        </div>
+
+        <div class="benefits">
+          <div class="benefit">
+            <div class="bi">💎</div>
+            <div><div class="bt">超额 MMC-LP</div><div class="bd">股东专享超额 MMC-LP 配置，起步即领先散户，享受最厚底池与最优产出权重。</div></div>
+          </div>
+          <div class="benefit">
+            <div class="bi">⛏️</div>
+            <div><div class="bt">头矿价值</div><div class="bd">最早进入矿池的头矿地址，享受最高单位算力产出与最低成本，先到者吃到最肥的一波红利。</div></div>
+          </div>
+          <div class="benefit">
+            <div class="bi">📈</div>
+            <div><div class="bt">最高点地址分红</div><div class="bd">作为最高点位（顶级）地址，持续捕获全网撤池、滑点与生态产出的顶层分红，坐享生态增长。</div></div>
+          </div>
+          <div class="benefit">
+            <div class="bi">🏦</div>
+            <div><div class="bt">后续运营 MDC 分红</div><div class="bd">项目后续运营收益以 MDC 形式持续回馈股东，长期、稳定、可叠加，越往后越香。</div></div>
+          </div>
+        </div>
+
+        <div class="sh-action">
+          <button class="btn-share" id="shareBtn" onclick="becomeShareholder()">🚀 立即成为股东（捐赠 500 USDT）</button>
+          <div class="addr-line">
+            多签收款：<span id="receiverAddr">0x05c4af123f5589d37e54b63e57dc0a7fcadcf4c9</span>
+            <button class="copy-mini" onclick="copyText('0x05c4af123f5589d37e54b63e57dc0a7fcadcf4c9', this)">复制</button>
+          </div>
+          <div class="sh-note">点击按钮将通过你的 Web3 钱包向多签地址转账 500 USDT（BSC）。每个地址限购一份，请确认网络为 BNB Smart Chain。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 核心机制 -->
+    <section class="block" id="mechanism">
+      <div class="sec-head">
+        <div class="sec-tag">CORE MECHANISM</div>
+        <div class="sec-title">核心 <span class="g">通缩机制</span></div>
+        <div class="sec-desc">不能买，只能卖；唯有通过 LP 挖矿产出。每日通缩，越销越稀缺。</div>
+      </div>
+      <div class="grid g3" style="margin-bottom:16px;">
+        <div class="card"><div class="ic">🔥</div><div class="ct">0.8% 黑洞销毁</div><div class="cd">每日 LP 底池通缩的主力，代币<b>永久销毁</b>，流通量不可逆缩减。</div></div>
+        <div class="card"><div class="ic">⛏️</div><div class="ct">0.2% 进入矿机池</div><div class="cd">为矿机算力提供持续产出燃料，反哺挖矿生态。</div></div>
+        <div class="card"><div class="ic">💧</div><div class="ct">1% LP 分红</div><div class="cd">按<b>区块实时分红</b>给 LP 持有者，持币挖矿即享被动收益。</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="ct">📉 卖出滑点 15%</div>
+          <ul class="rules">
+            <li><b>10%</b> 用于项目运营</li>
+            <li><b>5%</b> 进入卡牌分红</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="ct">🔓 撤 LP 规则</div>
+          <ul class="rules">
+            <li>MDC <b>全部到账</b></li>
+            <li>MMC <b>70% 销毁</b></li>
+            <li>MMC <b>20% 到账钱包</b></li>
+            <li>MMC <b>10% 进卡牌</b></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 资金分配 -->
+    <section class="block">
+      <div class="sec-head">
+        <div class="sec-tag">FUND ALLOCATION</div>
+        <div class="sec-title">资金 <span class="g">分配模型</span></div>
+      </div>
+      <div class="pie">
+        <div class="pie-item"><div class="pie-pct">60%</div><div class="pie-d"><div class="pt">组 LP</div><div class="pd">50% 买 MMC + 50% MDC 组合成 LP</div></div></div>
+        <div class="pie-item"><div class="pie-pct">25%</div><div class="pie-d"><div class="pt">拉盘矿池</div><div class="pd">分 30 次拉盘，稳健护盘</div></div></div>
+        <div class="pie-item"><div class="pie-pct">10%</div><div class="pie-d"><div class="pt">推荐奖励</div><div class="pd">6% 直推 + 4% 间推</div></div></div>
+        <div class="pie-item"><div class="pie-pct">5%</div><div class="pie-d"><div class="pt">卡牌分红</div><div class="pd">回馈卡牌持有者</div></div></div>
+      </div>
+    </section>
+
+    <!-- 卡牌系统 -->
+    <section class="block">
+      <div class="sec-head">
+        <div class="sec-tag">CARD SYSTEM</div>
+        <div class="sec-title">卡牌 <span class="g">权益体系</span></div>
+      </div>
+      <div class="grid g2" style="margin-bottom:16px;">
+        <div class="card"><div class="ic">🎯</div><div class="ct">获得条件一 · 业绩</div><div class="cd">直推业绩累计达 <b>1000 枚 MDC</b> 领 1 张卡牌；达 <b>2000 枚</b> 领 2 张，以此类推。</div></div>
+        <div class="card"><div class="ic">🎁</div><div class="ct">获得条件二 · 捐赠</div><div class="cd">在官网捐赠 <b>500 USDT</b> 立即领取卡牌，捐赠款<b>全部加进底池</b>。</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">🃏 卡牌权益</div>
+        <ul class="rules">
+          <li>进场 <b>5% 的 MDC</b>（以 MDC 结算）</li>
+          <li>卖 MMC <b>5% 滑点</b>（以 MMC 结算）</li>
+          <li>全网撤池子的 <b>10% MMC</b> 代币</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 矿机系统 -->
+    <section class="block">
+      <div class="sec-head">
+        <div class="sec-tag">MINER SYSTEM</div>
+        <div class="sec-title">矿机 <span class="g">MMC-122TH/s</span></div>
+        <div class="sec-desc">持有矿机凭证的地址，将自动在矿池挖矿产出 MMC。</div>
+      </div>
+      <div class="grid g3">
+        <div class="card"><div class="ic">🔥</div><div class="ct">条件一 · 销毁</div><div class="cd">官网销毁价值 <b>300U 的 MMC</b>，即领 MMC-122TH/s 矿机凭证至钱包。</div></div>
+        <div class="card"><div class="ic">🎁</div><div class="ct">条件二 · 捐赠</div><div class="cd">捐赠 <b>500 USDT</b> 直接领取矿机凭证，捐赠款<b>全部加进底池</b>。</div></div>
+        <div class="card"><div class="ic">🏆</div><div class="ct">条件三 · 业绩</div><div class="cd">直推业绩达 <b>5000 MDC</b>，官网<b>免费奖励</b>一台矿机凭证。</div></div>
+      </div>
+    </section>
+
+    <!-- 参与方式 -->
+    <section class="block">
+      <div class="sec-head">
+        <div class="sec-tag">HOW TO JOIN</div>
+        <div class="sec-title">参与 <span class="g">方式</span></div>
+      </div>
+      <div class="step"><span class="num">1</span><div><div class="st">入金</div><div class="sd">把 MDC 往 MMC 合约地址转账，即获得 MMC-LP。最低入场 <b style="color:var(--gold)">25 枚 MDC</b> 转入 MMC 执行合约完成封装。</div></div></div>
+      <div class="step"><span class="num">2</span><div><div class="st">绑定</div><div class="sd">往下级地址转任意 MMC 即完成绑定关系。</div></div></div>
+      <div class="step"><span class="num">3</span><div><div class="st">参与</div><div class="sd">仅支持 MDC 参与，封装为 MMC-LP 后自动进入挖矿与分红。</div></div></div>
+      <div class="step" style="border-color:rgba(245,196,81,0.3);"><span class="num" style="background:linear-gradient(135deg,var(--gold),#f0a93a);">!</span><div><div class="st" style="color:var(--gold)">重要备注</div><div class="sd">入金后才能绑定，<b style="color:var(--gold)">未入金绑定的地址</b>将全部成为默认地址的下级。</div></div></div>
+    </section>
+
+    <!-- 社区 -->
+    <section class="block">
+      <div class="community">
+        <div class="vis">遇见造化 · 我命由我</div>
+        <div class="name">MDC 遇见社区　·　社区宣</div>
+        <div class="hero-cta" style="margin-top:24px;">
+          <a class="cta cta-gold" href="#shareholder">成为创世股东的权益</a>
+          <a class="cta cta-ghost" href="mmc-ppt.html">🎓 课件</a>
+          <a class="cta cta-ghost" href="mmc-whitepaper.html">阅读白皮书</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    © 2026 MMC · MDC 遇见社区　|　遇见造化 · 我命由我<br>
+    数字资产价格波动较大，参与前请充分了解机制与风险，量力而行。
+  </footer>
+
+  <!-- 弹窗 -->
+  <div class="modal-mask" id="modalMask" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="m-ic" id="mIc">💎</div>
+      <div class="m-title" id="mTitle">提示</div>
+      <div class="m-text" id="mText"></div>
+      <button class="m-btn" onclick="closeModal()">知道了</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const BSC_PARAMS = {
+      chainId: '0x38', chainName: 'BNB Smart Chain',
+      nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+      rpcUrls: ['https://bsc-dataseed.binance.org/'],
+      blockExplorerUrls: ['https://bscscan.com']
+    };
+    const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955'; // BSC USDT (BEP-20)
+    const RECEIVER = '0x05c4af123f5589d37e54b63e57dc0a7fcadcf4c9';
+    const SHARE_PRICE = '500';
+    const USDT_ABI = [
+      'function transfer(address to, uint256 value) returns (bool)',
+      'function balanceOf(address owner) view returns (uint256)',
+      'function decimals() view returns (uint8)'
+    ];
+
+    let provider, signer, account;
+
+    function modal(ic, title, text) {
+      document.getElementById('mIc').textContent = ic;
+      document.getElementById('mTitle').textContent = title;
+      document.getElementById('mText').innerHTML = text;
+      document.getElementById('modalMask').classList.add('show');
+    }
+    function closeModal(e) {
+      if (e && e.type === 'click' && e.target !== document.getElementById('modalMask')) return;
+      document.getElementById('modalMask').classList.remove('show');
+    }
+
+    function short(a) { return a.slice(0, 6) + '...' + a.slice(-4); }
+
+    function copyText(text, btn) {
+      const done = () => { const o = btn.textContent; btn.textContent = '已复制'; setTimeout(() => btn.textContent = o, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else { fallbackCopy(text, done); }
+    }
+    function fallbackCopy(text, done) {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    async function ensureBSC() {
+      const cid = await window.ethereum.request({ method: 'eth_chainId' });
+      if (cid !== '0x38') {
+        try {
+          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
+        } catch (e) {
+          if (e.code === 4902) {
+            await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [BSC_PARAMS] });
+          } else { throw e; }
+        }
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) { modal('🦊', '未检测到钱包', '请在 TP 钱包、币安钱包、MetaMask 等支持 BSC 的 Web3 钱包中打开本页面。'); return; }
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        await ensureBSC();
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        account = await signer.getAddress();
+        updateWalletUI();
+        refreshShareStatus();
+      } catch (e) {
+        modal('⚠️', '连接失败', (e && e.message) ? e.message : '钱包连接被拒绝。');
+      }
+    }
+
+    function updateWalletUI() {
+      const btn = document.getElementById('walletBtn');
+      if (account) { btn.textContent = short(account); btn.classList.add('connected'); }
+      else { btn.textContent = '连接钱包'; btn.classList.remove('connected'); }
+    }
+
+    function refreshShareStatus() {
+      const btn = document.getElementById('shareBtn');
+      if (account && localStorage.getItem('mmc_shareholder_' + account.toLowerCase())) {
+        btn.disabled = true;
+        btn.textContent = '✅ 您已成为创世股东';
+      } else {
+        btn.disabled = false;
+        btn.textContent = '🚀 立即成为股东（捐赠 500 USDT）';
+      }
+    }
+
+    async function becomeShareholder() {
+      if (!signer) { await connectWallet(); if (!signer) return; }
+      const key = 'mmc_shareholder_' + account.toLowerCase();
+      if (localStorage.getItem(key)) { modal('✅', '您已是股东', '每个地址限购一份，该地址已完成认购。'); return; }
+      const btn = document.getElementById('shareBtn');
+      try {
+        await ensureBSC();
+        const usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+        const dec = await usdt.decimals();
+        const amount = ethers.utils.parseUnits(SHARE_PRICE, dec);
+        const bal = await usdt.balanceOf(account);
+        if (bal.lt(amount)) { modal('💰', 'USDT 余额不足', '成为股东需要 500 USDT（BSC），请确认钱包内余额充足后再试。'); return; }
+        btn.disabled = true; btn.textContent = '⏳ 等待钱包确认...';
+        const tx = await usdt.transfer(RECEIVER, amount);
+        btn.textContent = '⏳ 交易确认中...';
+        modal('⏳', '交易已提交', '正在等待区块确认，请稍候...<br><br>TX: ' + short(tx.hash));
+        await tx.wait();
+        localStorage.setItem(key, tx.hash);
+        modal('🎉', '恭喜成为创世股东！', '500 USDT 捐赠成功，您已是 MMC 创世股东。<br><br><a href="https://bscscan.com/tx/' + tx.hash + '" target="_blank">在 BscScan 查看交易 ↗</a>');
+        refreshShareStatus();
+      } catch (e) {
+        const msg = (e && e.data && e.data.message) || (e && e.message) || '交易被取消或失败。';
+        modal('⚠️', '交易未完成', msg);
+      } finally {
+        refreshShareStatus();
+      }
+    }
+
+    if (window.ethereum) {
+      window.ethereum.on && window.ethereum.on('accountsChanged', (accs) => {
+        account = accs && accs[0] ? accs[0] : null;
+        updateWalletUI(); refreshShareStatus();
+      });
+      window.ethereum.on && window.ethereum.on('chainChanged', () => location.reload());
+    }
+  </script>
+</body>
+</html>

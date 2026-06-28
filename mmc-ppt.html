@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MDC 第四生态 · 项目讲解课件</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --teal: #2dd4bf;
+      --emerald: #10b981;
+      --gold: #f5c451;
+      --gold-soft: #ffe49b;
+      --ink: #e6edf3;
+      --muted: #8a93a6;
+      --line: rgba(255,255,255,0.08);
+      --glass: linear-gradient(160deg, rgba(20,28,40,0.9), rgba(10,15,24,0.94));
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 18% 6%, rgba(45,212,191,0.14) 0%, transparent 44%),
+        radial-gradient(ellipse at 85% 12%, rgba(245,196,81,0.12) 0%, transparent 44%),
+        radial-gradient(ellipse at 50% 92%, rgba(16,185,129,0.12) 0%, transparent 46%),
+        linear-gradient(160deg, #06080d 0%, #0a1018 45%, #070b12 100%);
+    }
+
+    /* 进度条 */
+    .progress {
+      position: fixed; top: 0; left: 0; height: 4px; width: 0;
+      background: linear-gradient(90deg, var(--teal), var(--gold));
+      z-index: 60; transition: width 0.35s ease;
+      box-shadow: 0 0 12px rgba(45,212,191,0.6);
+    }
+
+    /* 顶栏 */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px;
+    }
+    .tb-logo {
+      font-size: 16px; font-weight: 900; letter-spacing: 1px;
+      background: linear-gradient(120deg, var(--teal), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .tb-actions { display: flex; gap: 8px; }
+    .tb-btn {
+      padding: 7px 13px; border-radius: 9px; font-size: 12px; font-weight: 800;
+      cursor: pointer; border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05); color: #cbd5e1; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;
+    }
+    .tb-btn:hover { background: rgba(255,255,255,0.12); }
+    .tb-btn.dl {
+      color: #04130f; border-color: transparent;
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      box-shadow: 0 4px 14px rgba(45,212,191,0.35);
+    }
+    .tb-btn.dl:hover { transform: translateY(-2px); }
+    .tb-btn:disabled { opacity: 0.6; cursor: progress; }
+
+    /* PDF 导出：渐变文字转实色 */
+    .pdf-export .grad,
+    .pdf-export .stat .v { background: none !important; -webkit-text-fill-color: var(--gold) !important; color: var(--gold) !important; }
+    .pdf-export h2.title .n { color: #04130f !important; -webkit-text-fill-color: #04130f !important; background: linear-gradient(135deg, var(--teal), var(--emerald)) !important; }
+
+    /* 幻灯片轨道 */
+    .deck { position: fixed; inset: 0; overflow: hidden; }
+    .slides {
+      display: flex; height: 100%; width: 100%;
+      transition: transform 0.5s cubic-bezier(0.5, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .slide {
+      flex: 0 0 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      padding: 70px 30px 86px;
+      overflow-y: auto;
+    }
+    .slide-inner { width: 100%; max-width: 920px; margin: auto; }
+
+    .kicker {
+      display: inline-block; font-size: 12px; letter-spacing: 3px;
+      color: var(--teal); padding: 5px 14px; border: 1px solid rgba(45,212,191,0.4);
+      border-radius: 20px; margin-bottom: 18px;
+    }
+    h1.title {
+      font-size: clamp(28px, 5.4vw, 48px); font-weight: 900; line-height: 1.22;
+      margin-bottom: 16px;
+    }
+    .grad {
+      background: linear-gradient(120deg, #d9fff4 0%, var(--teal) 42%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    h2.title {
+      font-size: clamp(22px, 4vw, 34px); font-weight: 800; margin-bottom: 22px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    h2.title .n {
+      flex-shrink: 0; width: 46px; height: 46px; border-radius: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: monospace; font-size: 18px; font-weight: 900; color: #04130f;
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      box-shadow: 0 6px 18px rgba(45,212,191,0.35);
+    }
+    .lead { font-size: clamp(15px, 2.4vw, 19px); color: #c2cad8; line-height: 1.9; margin-bottom: 18px; }
+    .lead .hl { color: var(--gold); font-weight: 800; }
+
+    .grid { display: grid; gap: 16px; }
+    .g2 { grid-template-columns: repeat(2, 1fr); }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid rgba(45,212,191,0.16); border-radius: 16px; padding: 20px 22px;
+    }
+    .card .ic { font-size: 26px; margin-bottom: 8px; }
+    .card .ct { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .card .cd { font-size: 13.5px; color: #aeb7c7; line-height: 1.7; }
+    .card .cd b { color: var(--gold); }
+
+    /* 股东权益高亮卡 */
+    .card.vip {
+      border-color: rgba(245,196,81,0.45);
+      background: linear-gradient(160deg, rgba(40,32,14,0.92), rgba(14,15,10,0.95));
+      box-shadow: 0 10px 30px rgba(245,196,81,0.12);
+    }
+
+    .stat {
+      text-align: center; padding: 22px 12px; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(45,212,191,0.08), rgba(245,196,81,0.05));
+      border: 1px solid rgba(45,212,191,0.22);
+    }
+    .stat .v {
+      font-size: clamp(22px, 4vw, 32px); font-weight: 900; margin-bottom: 4px;
+      background: linear-gradient(135deg, var(--teal), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat .l { font-size: 13px; color: var(--muted); }
+
+    ul.points { list-style: none; }
+    ul.points li {
+      position: relative; padding: 9px 0 9px 28px; font-size: clamp(14px, 2.2vw, 17px); color: #c8d0de;
+    }
+    ul.points li::before {
+      content: '▸'; position: absolute; left: 4px; top: 9px; color: var(--teal); font-size: 15px; font-weight: 900;
+    }
+    ul.points li b { color: var(--gold); }
+
+    /* 飞轮链路 */
+    .flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
+    .flow .node {
+      padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, rgba(16,185,129,0.32), rgba(45,212,191,0.2));
+      border: 1px solid rgba(45,212,191,0.5);
+    }
+    .flow .arr { color: var(--gold); font-size: 20px; font-weight: 900; }
+
+    .addr {
+      font-family: monospace; font-size: 13px; color: var(--teal); word-break: break-all;
+      background: rgba(45,212,191,0.08); padding: 5px 10px; border-radius: 8px; display: inline-block;
+    }
+
+    .steps { counter-reset: st; display: grid; gap: 14px; }
+    .step {
+      position: relative; padding: 16px 18px 16px 60px; border-radius: 14px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--line);
+    }
+    .step::before {
+      counter-increment: st; content: counter(st);
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      width: 30px; height: 30px; border-radius: 50%; font-weight: 900; color: #04130f;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+    }
+    .step .st { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+    .step .sd { font-size: 13px; color: #aeb7c7; }
+
+    .cover { text-align: center; }
+    .cover .en { font-size: clamp(13px, 2.4vw, 17px); letter-spacing: 6px; color: var(--emerald); margin: 6px 0 22px; }
+    .cover .sub { font-size: clamp(14px, 2.4vw, 18px); color: #c2cad8; line-height: 1.9; margin-bottom: 26px; }
+    .cover .meta { display: inline-flex; flex-wrap: wrap; gap: 22px; justify-content: center; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+    .cover .meta b { color: var(--gold); }
+
+    .big-end { font-size: clamp(28px, 6vw, 52px); font-weight: 900; letter-spacing: 4px; line-height: 1.3; }
+    .end-sub { font-size: clamp(15px, 2.6vw, 20px); color: #c2cad8; margin-top: 16px; }
+
+    /* 底部控制 */
+    .controls {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      padding: 14px; background: linear-gradient(0deg, rgba(6,8,13,0.88), transparent);
+    }
+    .nav-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(45,212,191,0.4);
+      background: rgba(45,212,191,0.1); color: var(--teal); font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(45,212,191,0.25); transform: scale(1.08); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .counter { font-size: 14px; color: #cbd5e1; font-family: monospace; min-width: 56px; text-align: center; }
+
+    .dots { position: fixed; bottom: 70px; left: 0; right: 0; z-index: 49; display: flex; justify-content: center; gap: 7px; flex-wrap: wrap; padding: 0 20px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.22); cursor: pointer; transition: all 0.2s; }
+    .dot.active { background: var(--teal); width: 22px; border-radius: 5px; }
+
+    .hint { position: fixed; bottom: 70px; right: 16px; font-size: 11px; color: #5d6678; z-index: 49; }
+
+    @media (max-width: 640px) {
+      .g2, .g3, .g4 { grid-template-columns: 1fr; }
+      .slide { padding: 64px 18px 92px; }
+      .dots { display: none; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+
+  <div class="topbar">
+    <div class="tb-logo">🟢 MDC 第四生态 · 讲解课件</div>
+    <div class="tb-actions">
+      <button class="tb-btn dl" id="dlBtn" onclick="downloadPPT()">📥 下载课件</button>
+      <a class="tb-btn" href="mmc-whitepaper.html">📖 白皮书</a>
+      <a class="tb-btn" href="index.html">← 返回 DApp</a>
+      <button class="tb-btn" id="fsBtn" onclick="toggleFs()">⛶ 全屏</button>
+    </div>
+  </div>
+
+  <div class="deck">
+    <div class="slides" id="slides">
+
+      <!-- 1 封面 -->
+      <section class="slide">
+        <div class="slide-inner cover">
+          <span class="kicker">PROJECT COURSEWARE · V1.0</span>
+          <h1 class="title grad">MDC 第四生态</h1>
+          <div class="en">MEET · MY DESTINY</div>
+          <div class="sub">通缩为核 ＋ LP 挖矿产出 ＋ 只能卖不能买 ＋ 区块实时分红<br>一份带你彻底读懂 MDC 第四生态暴富机制的讲解课件</div>
+          <div class="meta">
+            <span>公链：<b>BNB Chain</b></span>
+            <span>总量：<b>100 万枚</b></span>
+            <span>愿景：<b>遇见造化 · 我命由我</b></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 课程大纲 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">AGENDA</span>
+          <h2 class="title"><span class="n">00</span>课程大纲</h2>
+          <div class="grid g2">
+            <ul class="points">
+              <li><b>MMC 是什么</b>：定位与核心模型</li>
+              <li><b>核心通缩机制</b>：每日 2% 通缩飞轮</li>
+              <li><b>卖出与撤池</b>：滑点与撤 LP 规则</li>
+              <li><b>资金分配</b>：60/25/10/5 模型</li>
+              <li><b>商业模式</b>：三大引擎 · 通缩飞轮</li>
+            </ul>
+            <ul class="points">
+              <li><b>多方共赢</b>：四角色价值捕获</li>
+              <li><b>卡牌权益</b>：两大获取条件与三大权益</li>
+              <li><b>矿机算力</b>：122TH/s 三种获取</li>
+              <li><b>创世股东</b>：四大顶级福利（重点）</li>
+              <li><b>如何参与</b>：入金 · 绑定 · 四步上手</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 什么是 MMC -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">WHAT IS IT</span>
+          <h2 class="title"><span class="n">01</span>什么是 MDC 第四生态</h2>
+          <p class="lead"><span class="hl">MMC</span> 是 MDC 生态推出的全新「第四生态」暴富机制代币，发行总量 <span class="hl">100 万枚</span>。MMC <span class="hl">不能买、只能卖</span>，唯一获取方式是通过 LP 挖矿产出。</p>
+          <div class="grid g3">
+            <div class="stat"><div class="v">100 万</div><div class="l">发行总量（枚）</div></div>
+            <div class="stat"><div class="v">只能卖</div><div class="l">唯 LP 挖矿产出</div></div>
+            <div class="stat"><div class="v">极致通缩</div><div class="l">流通量持续缩减</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 核心通缩机制 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">DEFLATION</span>
+          <h2 class="title"><span class="n">02</span>核心通缩机制</h2>
+          <p class="lead">LP 底池每天通缩 <span class="hl">2%</span>，三路分配，驱动持续通缩与实时分红：</p>
+          <div class="grid g3">
+            <div class="card"><div class="ic">🔥</div><div class="ct">0.8% 黑洞销毁</div><div class="cd">代币<b>永久销毁</b>，流通量不可逆缩减，是通缩主力引擎。</div></div>
+            <div class="card"><div class="ic">⛏️</div><div class="ct">0.2% 矿机池</div><div class="cd">注入矿机池，为算力产出提供持续燃料，反哺挖矿生态。</div></div>
+            <div class="card"><div class="ic">💧</div><div class="ct">1% LP 分红</div><div class="cd">按<b>区块实时分红</b>给 LP 持有者，持币挖矿即享被动收益。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 卖出与撤池规则 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">SELL & EXIT</span>
+          <h2 class="title"><span class="n">03</span>卖出与撤池规则</h2>
+          <div class="grid g2">
+            <div class="card">
+              <div class="ct">📉 卖出滑点 15%</div>
+              <ul class="points" style="margin-top:6px;">
+                <li><b>10%</b> 用于项目运营</li>
+                <li><b>5%</b> 进入卡牌分红</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="ct">🔓 撤 LP 规则</div>
+              <ul class="points" style="margin-top:6px;">
+                <li>MDC <b>全部到账</b></li>
+                <li>MMC <b>70% 销毁</b> · <b>20% 到账钱包</b> · <b>10% 进卡牌</b></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 资金分配模型 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">ALLOCATION</span>
+          <h2 class="title"><span class="n">04</span>资金分配模型</h2>
+          <div class="grid g4">
+            <div class="stat"><div class="v">60%</div><div class="l">组 LP（50% 买 MMC + 50% MDC）</div></div>
+            <div class="stat"><div class="v">25%</div><div class="l">拉盘矿池（分 30 次）</div></div>
+            <div class="stat"><div class="v">10%</div><div class="l">推荐奖励（6% 直推 + 4% 间推）</div></div>
+            <div class="stat"><div class="v">5%</div><div class="l">卡牌分红</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 卡牌权益体系 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">CARD SYSTEM</span>
+          <h2 class="title"><span class="n">05</span>卡牌权益体系</h2>
+          <div class="grid g2" style="margin-bottom:16px;">
+            <div class="card"><div class="ic">🎯</div><div class="ct">条件一 · 业绩</div><div class="cd">直推业绩累计达 <b>1000 枚 MDC</b> 领 1 张；<b>2000 枚</b> 领 2 张，以此类推。</div></div>
+            <div class="card"><div class="ic">🎁</div><div class="ct">条件二 · 捐赠</div><div class="cd">官网捐赠 <b>500 USDT</b> 立即领取，捐赠款<b>全部加进底池</b>。</div></div>
+          </div>
+          <ul class="points">
+            <li>进场 <b>5% 的 MDC</b>（以 MDC 结算）</li>
+            <li>卖 MMC <b>5% 滑点</b>（以 MMC 结算）</li>
+            <li>全网撤池子的 <b>10% MMC</b> 代币</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 8 矿机算力体系 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">MINING · 重点</span>
+          <h2 class="title"><span class="n">06</span>矿机算力体系 · 122TH/s</h2>
+          <p class="lead">持有 <span class="hl">MMC-122TH/s</span> 矿机凭证即<span class="hl">自动挖矿</span>，<span class="hl">单台可挖约一年</span>，时间换空间持续盈利。三种获取方式，<span class="hl">首推「销毁获取」</span>：</p>
+          <div class="grid g3">
+            <div class="card vip"><div class="ic">🔥</div><div class="ct">销毁获取 · 核心推荐</div><div class="cd">官网销毁价值 <b>300U 的 MMC</b>，即领矿机凭证至钱包。</div></div>
+            <div class="card"><div class="ic">🎁</div><div class="ct">捐赠获取</div><div class="cd">捐赠 <b>500 USDT</b> 直接领取凭证，捐赠款<b>全部加进底池</b>。</div></div>
+            <div class="card"><div class="ic">🏆</div><div class="ct">业绩奖励</div><div class="cd">直推业绩达 <b>5000 MDC</b>，<b>免费奖励</b>一台矿机凭证。</div></div>
+          </div>
+          <ul class="points" style="margin-top:14px;">
+            <li><b>减少流通量</b>：销毁 MMC 永久退出流通，为通缩飞轮加速。</li>
+            <li><b>活跃场外收购</b>：销毁先要持币，持续催生场外买盘、稳固价格地板。</li>
+            <li><b>玩法多元 · 时间换空间</b>：销毁/捐赠/业绩三路并行，矿机可挖约一年，长期持续盈利。</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 9 创世股东权益（重点） -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">★ GENESIS SHAREHOLDER ★</span>
+          <h2 class="title"><span class="n">07</span>创世股东 · 四大顶级福利</h2>
+          <p class="lead">仅需 <span class="hl">500 USDT / 份</span>（每地址限购一份，全部加进底池），即享<span class="hl">最早、最厚、最顶层</span>的红利：</p>
+          <div class="grid g2">
+            <div class="card vip"><div class="ic">💎</div><div class="ct">超额 MMC-LP</div><div class="cd">股东专享<b>超额 MMC-LP</b> 配置，起步即领先散户，享最厚底池与最优产出权重。</div></div>
+            <div class="card vip"><div class="ic">⛏️</div><div class="ct">头矿价值</div><div class="cd">最早进入矿池的<b>头矿地址</b>，单位算力产出最高、成本最低，吃最肥的一波红利。</div></div>
+            <div class="card vip"><div class="ic">📈</div><div class="ct">最高点地址分红</div><div class="cd">作为<b>顶级（最高点）地址</b>，持续捕获全网撤池、滑点与生态产出的顶层分红。</div></div>
+            <div class="card vip"><div class="ic">🏦</div><div class="ct">后续运营 MDC 分红</div><div class="cd">项目后续运营收益以 <b>MDC 持续回馈</b>股东，长期、稳定、可叠加，越往后越香。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 商业模式解读 · 三大引擎 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">BUSINESS MODEL</span>
+          <h2 class="title"><span class="n">08</span>商业模式解读 · 三大引擎</h2>
+          <p class="lead">本质是一台围绕<span class="hl">通缩稀缺</span>运转的价值飞轮，把「<span class="hl">买盘 · 供给 · 共识</span>」锁进同一个正向循环：</p>
+          <div class="grid g3">
+            <div class="card"><div class="ic">📉</div><div class="ct">① 供给单边收缩</div><div class="cd">只能卖不能买 + 每日 2% 通缩 + 撤池 70% 销毁，<b>流通量不可逆缩减</b>，天然制造稀缺。</div></div>
+            <div class="card"><div class="ic">💵</div><div class="ct">② 买盘持续注入</div><div class="cd">入金 <b>60% 组 LP、25% 分 30 次拉盘</b>，沉淀底池 + 缓慢抬价，形成「地板 + 上行」双支撑。</div></div>
+            <div class="card"><div class="ic">🎁</div><div class="ct">③ 收益反哺持有</div><div class="cd">LP 实时分红、卡牌与矿机产出让「<b>持有即生息</b>」，降抛压、拉长持币、进一步收紧流通。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 通缩飞轮 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">FLYWHEEL</span>
+          <h2 class="title"><span class="n">09</span>通缩飞轮 · 正向循环</h2>
+          <p class="lead">挖矿越活跃，飞轮转得越快，稀缺越来越强：</p>
+          <div class="flow">
+            <span class="node">LP 挖矿产出</span><span class="arr">→</span>
+            <span class="node">每日 2% 通缩</span><span class="arr">→</span>
+            <span class="node">黑洞销毁 · 撤池销毁</span><span class="arr">→</span>
+            <span class="node">流通量缩减</span><span class="arr">↺</span>
+          </div>
+          <ul class="points" style="margin-top:20px;">
+            <li><b>持续通缩</b>：销毁不可逆减少流通量，稀缺性随活跃度增强。</li>
+            <li><b>实时分红</b>：1% LP 分红按区块结算，持币挖矿即享被动收益。</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 12 多方共赢 · 价值捕获 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">VALUE CAPTURE</span>
+          <h2 class="title"><span class="n">10</span>多方共赢 · 价值捕获</h2>
+          <p class="lead">机制把全网产生的价值分层、精准地分配给不同角色，<span class="hl">越早进入、越核心，捕获越多</span>：</p>
+          <div class="grid g2">
+            <div class="card"><div class="ic">⛏️</div><div class="ct">LP 矿工</div><div class="cd">封装 MMC-LP 自动挖矿，享 <b>1% LP 区块实时分红</b>与 MMC 产出，是生态的<b>基础收益层</b>。</div></div>
+            <div class="card"><div class="ic">🃏</div><div class="ct">卡牌持有者</div><div class="cd">捕获进场 5% MDC、卖出 5% 滑点、全网撤池 10% MMC 三重权益，<b>交易越活跃、撤池越多，分红越厚</b>。</div></div>
+            <div class="card"><div class="ic">🖥️</div><div class="ct">矿机持有者</div><div class="cd">持 122TH/s 凭证自动挖矿，0.2% 通缩持续注入矿机池作燃料，<b>算力即被动现金流</b>。</div></div>
+            <div class="card vip"><div class="ic">💎</div><div class="ct">创世股东</div><div class="cd">站在价值链最顶层，叠加超额 MMC-LP、头矿、顶层分红与运营 MDC 分红，<b>一次卡位、长期复利</b>。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 参与方式 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">GET STARTED</span>
+          <h2 class="title"><span class="n">11</span>参与方式 · 入金与绑定</h2>
+          <div class="steps">
+            <div class="step"><div class="st">连接钱包</div><div class="sd">使用 TP / 币安等支持 BSC 的钱包，打开 DApp 连接。</div></div>
+            <div class="step"><div class="st">入金封装</div><div class="sd">把 MDC 往 MMC 合约地址转账，获得 MMC-LP，最低入场 25 枚 MDC。</div></div>
+            <div class="step"><div class="st">绑定关系</div><div class="sd">往下级地址转任意 MMC 即完成绑定（入金后才能绑定）。</div></div>
+            <div class="step"><div class="st">挖矿分红</div><div class="sd">封装为 MMC-LP 后自动进入挖矿与区块实时分红。</div></div>
+          </div>
+          <p class="lead" style="margin-top:16px;font-size:14px;color:var(--muted);">备注：未入金绑定的地址将全部成为默认地址的下级。</p>
+        </div>
+      </section>
+
+      <!-- 14 社区愿景 -->
+      <section class="slide">
+        <div class="slide-inner">
+          <span class="kicker">COMMUNITY</span>
+          <h2 class="title"><span class="n">12</span>MDC 遇见社区</h2>
+          <p class="lead">共识因人聚而成。MDC 遇见社区，与全球持有者共建、共赢、共富。</p>
+          <div class="card" style="text-align:center;padding:34px;">
+            <div class="grad" style="font-size:clamp(24px,5vw,38px);font-weight:900;letter-spacing:4px;">遇见造化 · 我命由我</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 结尾 -->
+      <section class="slide">
+        <div class="slide-inner cover">
+          <div class="big-end grad">遇见造化 · 我命由我</div>
+          <div class="end-sub">通缩为核 · 越销越稀缺　|　MDC 第四生态暴富机制</div>
+          <div class="meta" style="margin-top:26px; display:inline-flex; flex-wrap:wrap; gap:22px; justify-content:center; font-size:13px; color:var(--muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:18px;">
+            <span>MMC · MDC 遇见社区</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+  <div class="hint">← → 翻页 · 空格下一页</div>
+
+  <div class="controls">
+    <button class="nav-btn" id="prevBtn" onclick="go(current-1)">‹</button>
+    <span class="counter" id="counter">1 / 15</span>
+    <button class="nav-btn" id="nextBtn" onclick="go(current+1)">›</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    const track = document.getElementById('slides');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dotsWrap = document.getElementById('dots');
+    let current = 0;
+
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.onclick = () => go(i);
+      dotsWrap.appendChild(d);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function go(n) {
+      current = Math.max(0, Math.min(total - 1, n));
+      track.style.transform = 'translateX(-' + (current * 100) + '%)';
+      counter.textContent = (current + 1) + ' / ' + total;
+      progress.style.width = ((current) / (total - 1) * 100) + '%';
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      slides[current].scrollTop = 0;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { go(current + 1); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(current - 1); e.preventDefault(); }
+      else if (e.key === ' ') { go(current + 1); e.preventDefault(); }
+      else if (e.key === 'Home') { go(0); }
+      else if (e.key === 'End') { go(total - 1); }
+    });
+
+    let startX = 0, startY = 0;
+    track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+    track.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        go(current + (dx < 0 ? 1 : -1));
+      }
+    }, { passive: true });
+
+    function toggleFs() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen && document.exitFullscreen();
+      }
+    }
+
+    async function downloadPPT() {
+      const btn = document.getElementById('dlBtn');
+      if (typeof html2canvas === 'undefined' || !window.jspdf) {
+        alert('正在使用浏览器打印另存为 PDF，请在弹窗中选择“另存为 PDF / 保存为 PDF”。');
+        window.print();
+        return;
+      }
+      const oldText = btn.textContent;
+      btn.disabled = true;
+      document.body.classList.add('pdf-export');
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 8;
+        for (let i = 0; i < slides.length; i++) {
+          btn.textContent = '⏳ ' + (i + 1) + '/' + slides.length;
+          const inner = slides[i].querySelector('.slide-inner');
+          const canvas = await html2canvas(inner, {
+            scale: 2,
+            backgroundColor: '#06080d',
+            useCORS: true
+          });
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          if (i > 0) pdf.addPage();
+          pdf.setFillColor(6, 8, 13);
+          pdf.rect(0, 0, pageW, pageH, 'F');
+          const maxW = pageW - margin * 2;
+          const maxH = pageH - margin * 2;
+          const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+          const w = canvas.width * ratio;
+          const h = canvas.height * ratio;
+          pdf.addImage(imgData, 'JPEG', (pageW - w) / 2, (pageH - h) / 2, w, h);
+        }
+        pdf.save('MDC第四生态-讲解课件.pdf');
+      } catch (e) {
+        alert('生成 PDF 失败，将改用浏览器打印。请在弹窗中选择“另存为 PDF”。');
+        window.print();
+      } finally {
+        document.body.classList.remove('pdf-export');
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    }
+
+    go(0);
+  </script>
+</body>
+</html>
