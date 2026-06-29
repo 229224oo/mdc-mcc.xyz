@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDC · 第四生态暴富机制 | MDC 遇见社区</title>
+  <title>MDC最新生态</title>
+  <link rel="preconnect" href="https://fonts.googleapis.cn">
+  <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
+  <link href="https://fonts.googleapis.cn/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -77,7 +80,7 @@
       padding: 6px 18px; border: 1px solid rgba(245,196,81,0.4); border-radius: 30px; margin-bottom: 24px;
     }
     .hero h1 {
-      font-size: clamp(40px, 9vw, 84px); font-weight: 900; line-height: 1.02; letter-spacing: 2px;
+      font-size: clamp(28px, 5.2vw, 54px); font-weight: 900; line-height: 1.08; letter-spacing: 1px;
       background: linear-gradient(120deg, #d9fff4 0%, var(--teal) 40%, var(--gold) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       filter: drop-shadow(0 8px 40px rgba(45,212,191,0.3));
@@ -215,29 +218,104 @@
       .nlink { display: none; }
       .nav-actions .nlink.keep { display: inline-block; }
     }
+
+    /* 水墨画卷 · 首页悬挂 */
+    .ink-wrap { display: flex; justify-content: center; padding: 16px 16px 0; }
+    .ink-scroll { position: relative; width: 100%; max-width: 720px; filter: drop-shadow(0 18px 46px rgba(0,0,0,0.55)); }
+    .ink-roller {
+      height: 16px; margin: 0 -10px; border-radius: 8px; position: relative; z-index: 3;
+      background: linear-gradient(180deg, #7a5a2a, #3a2a12 55%, #5e451f);
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.22), inset 0 -3px 6px rgba(0,0,0,0.55);
+    }
+    .ink-roller::before, .ink-roller::after {
+      content: ''; position: absolute; top: 50%; transform: translateY(-50%); width: 12px; height: 24px; border-radius: 4px;
+      background: linear-gradient(180deg, #d8b466, #835f24); box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    }
+    .ink-roller::before { left: -8px; } .ink-roller::after { right: -8px; }
+    .ink-silk {
+      position: relative; overflow: hidden; padding: 26px 28px 20px;
+      background: linear-gradient(180deg, rgba(245,238,223,0.97), rgba(231,221,199,0.97));
+      border-left: 7px solid rgba(120,90,40,0.4); border-right: 7px solid rgba(120,90,40,0.4);
+    }
+    .ink-bg {
+      position: absolute; inset: 0; background-size: cover; background-position: center 32%;
+      opacity: 0.22; mix-blend-mode: multiply; filter: grayscale(100%) contrast(1.05); pointer-events: none;
+    }
+    .ink-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(245,238,223,0.55), transparent 30%, transparent 70%, rgba(231,221,199,0.7));
+    }
+    .ink-grid { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 22px; }
+    .ink-couplet {
+      writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px; line-height: 1.7; color: #2a2a2a;
+      font-family: 'Ma Shan Zheng', 'STKaiti', '华文楷体', 'KaiTi', '楷体', cursive; font-size: clamp(14px, 2.2vw, 19px);
+    }
+    .ink-center { text-align: center; }
+    .ink-title {
+      font-family: 'Ma Shan Zheng', 'STXingkai', '华文行楷', 'STKaiti', '华文楷体', 'KaiTi', '楷体', cursive;
+      font-size: clamp(30px, 6.4vw, 56px); font-weight: 400; color: #141414; letter-spacing: 3px; line-height: 1.18;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+    .ink-title .dot { color: #9a2a18; padding: 0 4px; }
+    .ink-mid { margin-top: 8px; font-family: 'Ma Shan Zheng', 'STKaiti', '华文楷体', 'KaiTi', '楷体', cursive; font-size: clamp(13px, 2.2vw, 18px); color: #3a342a; letter-spacing: 3px; }
+    .ink-prose {
+      position: relative; z-index: 1; max-width: 600px; margin: 16px auto 0; text-align: center; letter-spacing: 1px; color: #464034;
+      font-family: 'Ma Shan Zheng', 'STKaiti', '华文楷体', 'KaiTi', '楷体', cursive; font-size: clamp(12px, 2vw, 14.5px); line-height: 1.95;
+    }
+    @media (max-width: 760px) {
+      .ink-grid { flex-direction: column; gap: 6px; }
+      .ink-couplet { writing-mode: horizontal-tb; letter-spacing: 3px; font-size: 15px; }
+    }
+
+    /* 股东权益声明 */
+    .sh-statement {
+      margin: 0 auto 26px; max-width: 720px; text-align: center; padding: 14px 20px; border-radius: 14px;
+      font-size: clamp(14px, 2.4vw, 16px); font-weight: 700; color: var(--gold-soft);
+      background: linear-gradient(135deg, rgba(245,196,81,0.14), rgba(45,212,191,0.08)); border: 1px solid rgba(245,196,81,0.4);
+    }
   </style>
 </head>
 <body>
   <!-- 导航 -->
   <nav class="nav">
-    <div class="brand"><span class="mark">M</span><span>MMC<span class="grad"> · 遇见</span></span></div>
+    <div class="brand"><span class="mark">M</span><span>MMC<span class="grad"> · 您的MDC理财工具</span></span></div>
     <div class="nav-actions">
-      <a class="nlink" href="mmc-whitepaper.html">📖 白皮书</a>
-      <a class="nlink" href="mmc-ppt.html">🎓 课件</a>
       <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">连接钱包</button>
     </div>
   </nav>
 
+  <!-- 水墨画卷 · 首页悬挂 -->
+  <section class="ink-wrap">
+    <div class="ink-scroll">
+      <div class="ink-roller"></div>
+      <div class="ink-silk">
+        <div class="ink-bg" style="background-image:url('https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=traditional%20Chinese%20ink%20wash%20painting%20shanshui%20landscape%2C%20misty%20mountains%20and%20river%2C%20pine%20trees%2C%20monochrome%20black%20ink%20on%20rice%20paper%2C%20minimalist%2C%20large%20negative%20space%2C%20sumi-e%2C%20elegant%20atmospheric%20mist%2C%20no%20text&image_size=landscape_16_9');"></div>
+        <div class="ink-grid">
+          <div class="ink-center">
+            <div class="ink-title">遇见造化<span class="dot">·</span>我命由我</div>
+            <div class="ink-mid">天道铺局　人心落子　·　万般定数　皆可重塑</div>
+          </div>
+        </div>
+        <p class="ink-prose">造化，是天地机缘、宿命起落、世间定数<br>遇见造化，便是直面人生所有既定际遇——困境与馈赠<br>造化予境遇，我自写余生</p>
+      </div>
+      <div class="ink-roller"></div>
+    </div>
+  </section>
+
   <!-- Hero -->
   <header class="hero wrap">
     <span class="eyebrow">MDC 全球最新 · 第四生态</span>
-    <h1>MDC 第四生态 · 暴富机制</h1>
+    <h1>MDC 第四生态 · 全球最新</h1>
     <div class="slogan">遇见造化 · 我命由我</div>
     <p class="sub">通缩为核 · LP 挖矿产出 · 只能卖不能买。MMC 链上持续销毁，流通量缩减到极致，稀缺即价值。</p>
     <div class="hero-cta">
-      <a class="cta cta-gold" href="#shareholder">🚀 成为股东</a>
-      <a class="cta cta-ghost" href="mmc-ppt.html">🎓 课件</a>
+      <a class="cta cta-gold" href="#shareholder">💎 股东权益</a>
+      <a class="cta cta-ghost" href="docs/mmc-ppt.html">🎓 课件</a>
       <a class="cta cta-ghost" href="#mechanism">了解机制</a>
+    </div>
+    <div class="hero-cta" style="margin-top:14px;">
+      <a class="cta cta-ghost" href="https://mdcdefi.com" target="_blank" rel="noopener">🌐 第二生态</a>
+      <a class="cta cta-ghost" href="https://dao.mdcdefi.com" target="_blank" rel="noopener">🏛️ 第三生态</a>
     </div>
     <div class="hero-stats">
       <div class="hstat"><div class="v">100 万枚</div><div class="l">发行总量</div></div>
@@ -277,6 +355,8 @@
           </div>
         </div>
 
+        <div class="sh-statement">💎 平台没有任何额外隐藏的、以盈利为目的的板块；所有股东共享平台的全部分红。</div>
+
         <div class="sh-action">
           <button class="btn-share" id="shareBtn" onclick="becomeShareholder()">🚀 立即成为股东（捐赠 500 USDT）</button>
           <div class="addr-line">
@@ -296,8 +376,8 @@
         <div class="sec-desc">不能买，只能卖；唯有通过 LP 挖矿产出。每日通缩，越销越稀缺。</div>
       </div>
       <div class="grid g3" style="margin-bottom:16px;">
-        <div class="card"><div class="ic">🔥</div><div class="ct">0.8% 黑洞销毁</div><div class="cd">每日 LP 底池通缩的主力，代币<b>永久销毁</b>，流通量不可逆缩减。</div></div>
-        <div class="card"><div class="ic">⛏️</div><div class="ct">0.2% 进入矿机池</div><div class="cd">为矿机算力提供持续产出燃料，反哺挖矿生态。</div></div>
+        <div class="card"><div class="ic">🔥</div><div class="ct">0.3% 黑洞销毁</div><div class="cd">每日 LP 底池通缩的主力，代币<b>永久销毁</b>，流通量不可逆缩减。</div></div>
+        <div class="card"><div class="ic">⛏️</div><div class="ct">0.7% 进入矿机池</div><div class="cd">为矿机算力提供持续产出燃料，反哺挖矿生态。</div></div>
         <div class="card"><div class="ic">💧</div><div class="ct">1% LP 分红</div><div class="cd">按<b>区块实时分红</b>给 LP 持有者，持币挖矿即享被动收益。</div></div>
       </div>
       <div class="grid g2">
@@ -387,8 +467,8 @@
         <div class="name">MDC 遇见社区　·　社区宣</div>
         <div class="hero-cta" style="margin-top:24px;">
           <a class="cta cta-gold" href="#shareholder">成为创世股东的权益</a>
-          <a class="cta cta-ghost" href="mmc-ppt.html">🎓 课件</a>
-          <a class="cta cta-ghost" href="mmc-whitepaper.html">阅读白皮书</a>
+          <a class="cta cta-ghost" href="docs/mmc-ppt.html">🎓 课件</a>
+          <a class="cta cta-ghost" href="docs/mmc-whitepaper.html">阅读白皮书</a>
         </div>
       </div>
     </section>
