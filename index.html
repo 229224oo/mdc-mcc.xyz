@@ -7,6 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.cn">
   <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
   <link href="https://fonts.googleapis.cn/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+  <!-- DApp 图标（TP / 钱包浏览器「最近使用」展示） -->
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#8b5cf6">
+  <meta property="og:title" content="MDC最新生态">
+  <meta property="og:description" content="MDC 第四生态 · 全球最新 · MMC 通缩机制">
+  <meta property="og:image" content="logo-512.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="logo-512.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -49,11 +59,15 @@
     }
     .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 18px; letter-spacing: .5px; }
     .brand .mark {
-      width: 34px; height: 34px; border-radius: 10px;
+      width: 40px; height: 40px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 17px; color: #04130f; font-weight: 900;
-      background: linear-gradient(135deg, var(--teal), var(--emerald));
-      box-shadow: 0 6px 18px rgba(45,212,191,0.35);
+      box-shadow: 0 6px 18px rgba(168,85,247,0.45);
+    }
+    .logo-ico { width: 100%; height: 100%; display: block; }
+    .logo-badge {
+      width: 66px; height: 66px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 28px rgba(168,85,247,0.5);
     }
     .brand .grad { background: linear-gradient(120deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .nav-actions { display: flex; align-items: center; gap: 9px; }
@@ -276,9 +290,27 @@
   </style>
 </head>
 <body>
+  <!-- MMC Logo · 可复用矢量定义（紫粉渐变圆 + M + MMC） -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mmcLogo" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="mmcGrad" x1="8" y1="6" x2="92" y2="96" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#8b5cf6"/>
+          <stop offset=".5" stop-color="#a855f7"/>
+          <stop offset="1" stop-color="#e248c6"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="49" fill="url(#mmcGrad)"/>
+      <path d="M28 58 V33 L50 51 L72 33 V58" fill="none" stroke="#fff"
+        stroke-width="9.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="50" y="81" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="16" font-weight="700" letter-spacing="2.5" fill="#fff">MMC</text>
+    </symbol>
+  </svg>
+
   <!-- 导航 -->
   <nav class="nav">
-    <div class="brand"><span class="mark">M</span><span>MMC<span class="grad"> · 您的MDC理财工具</span></span></div>
+    <div class="brand"><span class="mark"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></span><span>MMC<span class="grad"> · 您的MDC理财工具</span></span></div>
     <div class="nav-actions">
       <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">连接钱包</button>
     </div>
@@ -316,6 +348,11 @@
     <div class="hero-cta" style="margin-top:14px;">
       <a class="cta cta-ghost" href="https://mdcdefi.com" target="_blank" rel="noopener">🌐 第二生态</a>
       <a class="cta cta-ghost" href="https://dao.mdcdefi.com" target="_blank" rel="noopener">🏛️ 第三生态</a>
+      <a class="cta cta-ghost" href="https://t.me/SunDaoGlobal" target="_blank" rel="noopener" aria-label="Telegram 社区">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:-3px;"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+        Telegram
+      </a>
+      <button class="cta cta-ghost" type="button" style="font-family:inherit;cursor:pointer;" onclick="copyText('https://t.me/SunDaoGlobal', this)">📋 复制 TG 链接</button>
     </div>
     <div class="hero-stats">
       <div class="hstat"><div class="v">100 万枚</div><div class="l">发行总量</div></div>
@@ -463,8 +500,8 @@
     <!-- 社区 -->
     <section class="block">
       <div class="community">
+        <div class="logo-badge" style="margin-bottom:18px;"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></div>
         <div class="vis">遇见造化 · 我命由我</div>
-        <div class="name">MDC 遇见社区　·　社区宣</div>
         <div class="hero-cta" style="margin-top:24px;">
           <a class="cta cta-gold" href="#shareholder">成为创世股东的权益</a>
           <a class="cta cta-ghost" href="docs/mmc-ppt.html">🎓 课件</a>
