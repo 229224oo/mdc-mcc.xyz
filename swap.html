@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDC SWAP · 代币兑换</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <meta name="theme-color" content="#06080d">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #06080d;
+      --teal: #2dd4bf;
+      --emerald: #10b981;
+      --gold: #f5c451;
+      --gold-soft: #ffe49b;
+      --ink: #e6edf3;
+      --muted: #8a93a6;
+      --line: rgba(255,255,255,0.08);
+      --glass: linear-gradient(160deg, rgba(20,28,40,0.78), rgba(10,15,24,0.86));
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'SimHei', sans-serif;
+      color: var(--ink); line-height: 1.7; min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 0%, rgba(45,212,191,0.12) 0%, transparent 42%),
+        radial-gradient(ellipse at 88% 8%, rgba(245,196,81,0.10) 0%, transparent 44%),
+        radial-gradient(ellipse at 50% 100%, rgba(16,185,129,0.10) 0%, transparent 48%),
+        linear-gradient(160deg, #06080d 0%, #0a1018 45%, #070b12 100%);
+      background-attachment: fixed; overflow-x: hidden;
+    }
+
+    /* 导航 */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between; padding: 14px 22px;
+      background: linear-gradient(180deg, rgba(8,11,18,0.92), rgba(8,11,18,0.6));
+      backdrop-filter: blur(16px); border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 18px; letter-spacing: .5px; }
+    .brand .mark { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(168,85,247,0.45); }
+    .logo-ico { width: 100%; height: 100%; display: block; }
+    .brand .grad { background: linear-gradient(120deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-actions { display: flex; align-items: center; gap: 9px; }
+    .btn-wallet {
+      padding: 10px 18px; border-radius: 11px; font-size: 13px; font-weight: 800; cursor: pointer;
+      border: none; color: #04130f; background: linear-gradient(135deg, var(--teal), var(--emerald));
+      box-shadow: 0 6px 20px rgba(45,212,191,0.35); transition: all .2s; white-space: nowrap;
+    }
+    .btn-wallet:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(45,212,191,0.5); }
+    .btn-wallet.connected { background: linear-gradient(135deg, #1f2a3a, #131a26); color: var(--teal); border: 1px solid rgba(45,212,191,0.4); font-family: monospace; }
+
+    /* 右侧弹出菜单 */
+    .menu-btn {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap;
+      padding: 10px 15px; border-radius: 11px; font-size: 13px; font-weight: 800;
+      color: #cbd5e1; border: 1px solid var(--line); background: rgba(255,255,255,0.04); transition: all .2s;
+    }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .menu-mask { position: fixed; inset: 0; z-index: 900; background: rgba(3,5,9,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .menu-mask.show { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; z-index: 1000; height: 100%; width: 300px; max-width: 84vw;
+      display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+      background: linear-gradient(180deg,#0a121e,#070b12); border-left: 1px solid rgba(45,212,191,0.2); box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    }
+    .drawer.show { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+    .drawer-brand { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 15px; }
+    .drawer-brand .mark { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; }
+    .drawer-close { width: 36px; height: 36px; border-radius: 9px; border: none; background: transparent; color: #8a97ab; font-size: 24px; line-height: 1; cursor: pointer; }
+    .drawer-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+    .drawer-wallet { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .drawer-wallet .btn-wallet { width: 100%; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 14px 10px; }
+    .drawer-group { margin-bottom: 14px; }
+    .drawer-group-label { padding: 0 12px; margin-bottom: 5px; font-size: 11px; letter-spacing: 2px; color: #8a97ab; display: flex; align-items: center; gap: 6px; }
+    .drawer-link { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #cbd5e1; text-decoration: none; margin-bottom: 3px; transition: all .2s; }
+    .drawer-link:hover { background: rgba(45,212,191,0.1); color: #fff; }
+    .drawer-link.active { background: linear-gradient(135deg, var(--teal), var(--emerald)); color: #04130f; }
+    .drawer-link .di { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .drawer-link .di svg { width: 20px; height: 20px; display: block; }
+    .drawer-foot { padding: 16px 18px; border-top: 1px solid var(--line); text-align: center; font-size: 11px; color: #5d6678; line-height: 1.7; }
+
+    /* SWAP 主体 */
+    .swap-wrap { max-width: 480px; margin: 0 auto; padding: 30px 16px 60px; }
+    .swap-head { text-align: center; margin-bottom: 22px; }
+    .swap-head h1 { font-size: clamp(24px, 5vw, 32px); font-weight: 900; background: linear-gradient(120deg, #d9fff4, var(--teal) 45%, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .swap-head p { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+    .swap-card { background: var(--glass); border: 1px solid var(--line); border-radius: 22px; padding: 20px; box-shadow: 0 24px 70px rgba(0,0,0,0.5); }
+
+    .tk-box { background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; transition: border-color .2s; }
+    .tk-box:focus-within { border-color: rgba(45,212,191,0.5); }
+    .tk-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .tk-bal { display: flex; align-items: center; gap: 8px; }
+    .tk-bal b { color: #cbd5e1; font-family: monospace; }
+    .max-btn { font-size: 11px; font-weight: 800; color: var(--teal); background: rgba(45,212,191,0.12); border: 1px solid rgba(45,212,191,0.3); border-radius: 7px; padding: 2px 8px; cursor: pointer; }
+    .max-btn:hover { background: rgba(45,212,191,0.25); }
+    .tk-row { display: flex; align-items: center; gap: 12px; }
+    .tk-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: #fff; font-size: 26px; font-weight: 800; font-family: monospace; }
+    .tk-input::placeholder { color: #3f4a5c; }
+    .tk-input[readonly] { color: var(--teal); }
+    .tk-pill { display: flex; align-items: center; gap: 7px; flex-shrink: 0; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 15px; color: #fff; background: linear-gradient(135deg, rgba(45,212,191,0.18), rgba(245,196,81,0.12)); border: 1px solid rgba(45,212,191,0.3); }
+
+    .switch-wrap { display: flex; justify-content: center; margin: -8px 0; position: relative; z-index: 2; }
+    .switch-btn { width: 40px; height: 40px; border-radius: 12px; border: 3px solid #0b121c; cursor: pointer; font-size: 18px; color: #04130f; background: linear-gradient(135deg, var(--teal), var(--emerald)); display: flex; align-items: center; justify-content: center; transition: transform .25s; }
+    .switch-btn:hover { transform: rotate(180deg); }
+
+    .quote-line { text-align: center; font-size: 13px; color: #aeb7c7; min-height: 20px; margin: 14px 0 4px; font-family: monospace; }
+
+    .slip-box { background: rgba(0,0,0,0.22); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; margin-top: 8px; }
+    .slip-title { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
+    .slip-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .slip-btn { font-size: 12.5px; font-weight: 700; color: #cbd5e1; background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 9px; padding: 6px 11px; cursor: pointer; transition: all .15s; }
+    .slip-btn:hover { background: rgba(255,255,255,0.1); }
+    .slip-btn.active { background: rgba(45,212,191,0.18); border-color: rgba(45,212,191,0.5); color: var(--teal); }
+    .slip-input { width: 70px; font-size: 12.5px; color: #fff; background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 9px; padding: 6px 10px; outline: none; }
+    .slip-input:focus { border-color: rgba(45,212,191,0.5); }
+    .slip-hint { font-size: 11.5px; color: var(--gold); margin-top: 8px; display: none; }
+    .slip-hint.show { display: block; }
+
+    .min-line { text-align: center; font-size: 12px; color: var(--muted); min-height: 18px; margin: 12px 0; }
+
+    .action-btn {
+      width: 100%; padding: 16px; border-radius: 15px; border: none; cursor: pointer;
+      font-size: 16px; font-weight: 900; letter-spacing: .5px; color: #04130f;
+      background: linear-gradient(135deg, var(--teal), var(--emerald)); box-shadow: 0 10px 30px rgba(45,212,191,0.35); transition: all .2s;
+    }
+    .action-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(45,212,191,0.5); }
+    .action-btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(15%); }
+    .action-btn[data-act="approve"] { background: linear-gradient(135deg, var(--gold), #f0a93a); color: #1a1304; box-shadow: 0 10px 30px rgba(245,196,81,0.35); }
+
+    .defl-note { margin-top: 18px; font-size: 11.5px; color: var(--muted); line-height: 1.7; text-align: center; padding: 12px 14px; border-radius: 12px; background: rgba(245,196,81,0.06); border: 1px solid rgba(245,196,81,0.2); }
+
+    /* 弹窗 */
+    .modal-mask { position: fixed; inset: 0; background: rgba(3,5,9,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-mask.show { display: flex; }
+    .modal { max-width: 420px; width: 100%; border-radius: 20px; padding: 30px 26px; text-align: center; background: linear-gradient(160deg, #131c28, #0b121c); border: 1px solid rgba(45,212,191,0.3); box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    .modal .m-ic { font-size: 44px; margin-bottom: 12px; }
+    .modal .m-title { font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .modal .m-text { font-size: 14px; color: #b6bfd0; line-height: 1.8; word-break: break-word; }
+    .modal .m-text a { color: var(--teal); }
+    .modal .m-btn { margin-top: 22px; padding: 12px 28px; border-radius: 11px; border: none; cursor: pointer; font-weight: 800; color: #04130f; background: linear-gradient(135deg, var(--teal), var(--emerald)); }
+
+    @media (max-width: 480px) {
+      .nav { padding: 12px 16px; }
+      .brand { font-size: 15px; }
+      .brand .mark { width: 34px; height: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- MMC Logo · 复用矢量定义 -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mmcLogo" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="mmcGrad" x1="8" y1="6" x2="92" y2="96" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#8b5cf6"/>
+          <stop offset=".5" stop-color="#a855f7"/>
+          <stop offset="1" stop-color="#e248c6"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="49" fill="url(#mmcGrad)"/>
+      <path d="M28 58 V33 L50 51 L72 33 V58" fill="none" stroke="#fff" stroke-width="9.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="50" y="81" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2.5" fill="#fff">MMC</text>
+    </symbol>
+  </svg>
+
+  <!-- 导航 -->
+  <nav class="nav">
+    <a class="brand" href="index.html" style="text-decoration:none;color:inherit;"><span class="mark"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></span><span>MMC<span class="grad"> · 您的MDC理财工具</span></span></a>
+    <div class="nav-actions">
+      <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">连接钱包</button>
+      <button class="menu-btn" onclick="openMenu()" aria-label="打开菜单">☰ 菜单</button>
+    </div>
+  </nav>
+
+  <!-- 右侧弹出菜单导航 -->
+  <div class="menu-mask" id="menuMask" onclick="closeMenu()"></div>
+  <aside class="drawer" id="drawer" aria-label="导航菜单">
+    <div class="drawer-head">
+      <div class="drawer-brand"><span class="mark"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></span><span>MMC<span class="grad"> · 导航</span></span></div>
+      <button class="drawer-close" onclick="closeMenu()" aria-label="关闭菜单">&times;</button>
+    </div>
+    <div class="drawer-wallet">
+      <button class="btn-wallet" id="walletBtn2" onclick="connectWallet()">💎 连接钱包</button>
+    </div>
+    <nav class="drawer-body">
+      <div class="drawer-group">
+        <div class="drawer-group-label">主页</div>
+        <a class="drawer-link" href="index.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>首页</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">交易</div>
+        <a class="drawer-link active" href="swap.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>MDC SWAP 兑换</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">生态权益</div>
+        <a class="drawer-link" href="index.html#shareholder"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>初代矿主权益</span></a>
+        <a class="drawer-link" href="index.html#cards"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>创世卡牌权益</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">全球最新生态资料</div>
+        <a class="drawer-link" href="docs/mmc-whitepaper.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>项目白皮书</span></a>
+        <a class="drawer-link" href="docs/mmc-ppt.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>讲解课件</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">参与</div>
+        <a class="drawer-link" href="index.html#join"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>如何参与</span></a>
+      </div>
+    </nav>
+    <div class="drawer-foot">© 2026 MMC · MDC社区共建<br>遇见造化 · 我命由我</div>
+  </aside>
+
+  <!-- SWAP 主体 -->
+  <main class="swap-wrap">
+    <header class="swap-head">
+      <h1>MDC SWAP 兑换</h1>
+      <p>基于 PancakeSwap V2 · BSC 主网链上兑换 · MDC ⇄ USDT</p>
+    </header>
+
+    <div class="swap-card">
+      <!-- 支付 -->
+      <div class="tk-box">
+        <div class="tk-top">
+          <span class="tk-label">支付</span>
+          <span class="tk-bal">余额: <b id="balFrom">--</b> <button class="max-btn" onclick="setMax()">MAX</button></span>
+        </div>
+        <div class="tk-row">
+          <input id="amountIn" class="tk-input" type="text" inputmode="decimal" placeholder="0.0" oninput="onAmountInput()" autocomplete="off">
+          <span class="tk-pill"><span id="fromIcon">💵</span><span id="fromSym">USDT</span></span>
+        </div>
+      </div>
+
+      <!-- 切换方向 -->
+      <div class="switch-wrap"><button class="switch-btn" onclick="switchDir()" aria-label="切换兑换方向">⇅</button></div>
+
+      <!-- 获得 -->
+      <div class="tk-box">
+        <div class="tk-top">
+          <span class="tk-label">获得（预估）</span>
+          <span class="tk-bal">余额: <b id="balTo">--</b></span>
+        </div>
+        <div class="tk-row">
+          <input id="amountOut" class="tk-input" type="text" placeholder="0.0" readonly>
+          <span class="tk-pill"><span id="toIcon">🪙</span><span id="toSym">MDC</span></span>
+        </div>
+      </div>
+
+      <div class="quote-line" id="priceLine"></div>
+
+      <!-- 滑点 -->
+      <div class="slip-box">
+        <div class="slip-title">滑点容差</div>
+        <div class="slip-row">
+          <button class="slip-btn" data-v="0.5" onclick="setSlippage(0.5)">0.5%</button>
+          <button class="slip-btn" data-v="1" onclick="setSlippage(1)">1%</button>
+          <button class="slip-btn" data-v="3" onclick="setSlippage(3)">3%</button>
+          <button class="slip-btn" data-v="5" onclick="setSlippage(5)">5%</button>
+          <input id="slipCustom" class="slip-input" type="text" inputmode="decimal" placeholder="自定义" oninput="onSlipCustom()" autocomplete="off">
+          <span style="color:var(--muted);font-size:13px;">%</span>
+        </div>
+        <div class="slip-hint" id="slipHint">MDC 含约 2% 通缩税，建议滑点 ≥ 3%，过低可能导致兑换失败。</div>
+      </div>
+
+      <div class="min-line" id="minLine"></div>
+
+      <button class="action-btn" id="actionBtn" onclick="handleAction()" data-act="connect">💎 连接钱包</button>
+    </div>
+
+    <p class="defl-note">MDC 交易含约 2% 税点</p>
+  </main>
+
+  <!-- 弹窗 -->
+  <div class="modal-mask" id="modalMask" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="m-ic" id="mIc">💎</div>
+      <div class="m-title" id="mTitle">提示</div>
+      <div class="m-text" id="mText"></div>
+      <button class="m-btn" onclick="closeModal()">知道了</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    /* ===== 常量配置 ===== */
+    const BSC_PARAMS = {
+      chainId: '0x38', chainName: 'BNB Smart Chain',
+      nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+      rpcUrls: ['https://bsc-dataseed.binance.org/'],
+      blockExplorerUrls: ['https://bscscan.com']
+    };
+    const BSC_RPC = 'https://bsc-dataseed.binance.org/';
+    // PancakeSwap V2 路由
+    const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+    // 代币（MDC 由用户指定合约地址；USDT 为 BSC 官方 BEP-20）
+    const TOKENS = {
+      USDT: { symbol: 'USDT', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18, icon: '💵' },
+      MDC:  { symbol: 'MDC',  address: '0xd1ba69a44888ee50819c554d3d6f4ee457622894', decimals: 18, icon: '🪙' }
+    };
+    const ERC20_ABI = [
+      'function balanceOf(address) view returns (uint256)',
+      'function allowance(address,address) view returns (uint256)',
+      'function approve(address,uint256) returns (bool)',
+      'function decimals() view returns (uint8)'
+    ];
+    const ROUTER_ABI = [
+      'function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[])',
+      'function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline)'
+    ];
+
+    /* ===== 状态 ===== */
+    const readProvider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+    let provider, signer, account;
+    let fromKey = 'USDT';                       // 默认 USDT -> MDC
+    let slippage = 3;                           // 默认滑点 3%
+    let lastAmountOut = null;                   // BigNumber 报价
+    let fromBal = null;                         // 当前支付币余额 BigNumber
+    let allowanceCache = ethers.constants.Zero; // 当前支付币对路由的授权额
+    let quoteTimer = null;
+    let quoting = false;
+
+    const curFrom = () => TOKENS[fromKey];
+    const curTo   = () => TOKENS[fromKey === 'USDT' ? 'MDC' : 'USDT'];
+
+    /* ===== 工具 ===== */
+    function short(a) { return a.slice(0, 6) + '...' + a.slice(-4); }
+    function trimNum(s) {
+      const n = Number(s);
+      if (!isFinite(n) || n === 0) return '0';
+      return n.toLocaleString('en-US', { maximumFractionDigits: 6 });
+    }
+    function modal(ic, title, text) {
+      document.getElementById('mIc').textContent = ic;
+      document.getElementById('mTitle').textContent = title;
+      document.getElementById('mText').innerHTML = text;
+      document.getElementById('modalMask').classList.add('show');
+    }
+    function closeModal(e) {
+      if (e && e.type === 'click' && e.target !== document.getElementById('modalMask')) return;
+      document.getElementById('modalMask').classList.remove('show');
+    }
+    function parseErr(e) {
+      if (e && (e.code === 4001 || e.code === 'ACTION_REJECTED')) return '你已取消该操作。';
+      const msg = (e && e.data && e.data.message) || (e && e.error && e.error.message) || (e && e.reason) || (e && e.message) || '';
+      if (/insufficient funds/i.test(msg)) return 'BNB 余额不足以支付 Gas，请向钱包转入少量 BNB 后重试。';
+      if (/INSUFFICIENT_OUTPUT_AMOUNT/i.test(msg)) return '滑点过低导致兑换失败，请调高滑点后重试。';
+      if (/EXPIRED/i.test(msg)) return '交易超时（deadline 已过），请重试。';
+      if (/TRANSFER_FAILED|K\b/i.test(msg)) return '兑换失败，可能是滑点过低或流动性不足，请调高滑点重试。';
+      return msg || '交易被取消或失败。';
+    }
+
+    /* ===== 菜单 ===== */
+    function openMenu() { document.getElementById('drawer').classList.add('show'); document.getElementById('menuMask').classList.add('show'); }
+    function closeMenu() { document.getElementById('drawer').classList.remove('show'); document.getElementById('menuMask').classList.remove('show'); }
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeMenu(); });
+
+    /* ===== 钱包 ===== */
+    async function ensureBSC() {
+      const cid = await window.ethereum.request({ method: 'eth_chainId' });
+      if (cid !== '0x38') {
+        try {
+          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
+        } catch (e) {
+          if (e.code === 4902) { await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [BSC_PARAMS] }); }
+          else { throw e; }
+        }
+      }
+    }
+    async function connectWallet() {
+      if (!window.ethereum) { modal('🦊', '未检测到钱包', '请在 TP 钱包、币安钱包、MetaMask 等支持 BSC 的 Web3 钱包中打开本页面。'); return; }
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        await ensureBSC();
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        account = await signer.getAddress();
+        updateWalletUI();
+        await refreshBalances();
+        await refreshAllowance();
+        updateButton();
+      } catch (e) {
+        modal('⚠️', '连接失败', parseErr(e));
+      }
+    }
+    function updateWalletUI() {
+      [['walletBtn', '连接钱包'], ['walletBtn2', '💎 连接钱包']].forEach(([id, def]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        if (account) { btn.textContent = short(account); btn.classList.add('connected'); }
+        else { btn.textContent = def; btn.classList.remove('connected'); }
+      });
+    }
+
+    /* ===== 渲染：代币、滑点 ===== */
+    function renderTokens() {
+      document.getElementById('fromSym').textContent = curFrom().symbol;
+      document.getElementById('fromIcon').textContent = curFrom().icon;
+      document.getElementById('toSym').textContent = curTo().symbol;
+      document.getElementById('toIcon').textContent = curTo().icon;
+    }
+    function renderSlippage() {
+      document.querySelectorAll('.slip-btn').forEach(b => {
+        b.classList.toggle('active', Number(b.dataset.v) === slippage);
+      });
+      document.getElementById('slipHint').classList.toggle('show', slippage < 3);
+    }
+
+    /* ===== 报价（防抖） ===== */
+    function parseIn() {
+      const v = document.getElementById('amountIn').value.trim();
+      if (!v || isNaN(v) || Number(v) <= 0) return ethers.constants.Zero;
+      try { return ethers.utils.parseUnits(v, curFrom().decimals); } catch (e) { return ethers.constants.Zero; }
+    }
+    function minOut() {
+      if (!lastAmountOut) return ethers.constants.Zero;
+      const bps = Math.floor((100 - slippage) * 100); // 例 3% -> 9700
+      return lastAmountOut.mul(bps).div(10000);
+    }
+    function onAmountInput() {
+      clearTimeout(quoteTimer);
+      lastAmountOut = null;
+      document.getElementById('amountOut').value = '';
+      const amt = parseIn();
+      updateButton();
+      if (amt.isZero()) { updateQuoteLines(); return; }
+      quoting = true; updateButton();
+      quoteTimer = setTimeout(() => doQuote(amt), 420);
+    }
+    async function doQuote(amt) {
+      try {
+        const router = new ethers.Contract(ROUTER, ROUTER_ABI, readProvider);
+        const path = [curFrom().address, curTo().address];
+        const amounts = await router.getAmountsOut(amt, path);
+        // 仅采用最新输入的报价
+        if (!parseIn().eq(amt)) return;
+        lastAmountOut = amounts[amounts.length - 1];
+        document.getElementById('amountOut').value = trimNum(ethers.utils.formatUnits(lastAmountOut, curTo().decimals));
+        updateQuoteLines();
+      } catch (e) {
+        lastAmountOut = null;
+        document.getElementById('amountOut').value = '';
+        document.getElementById('priceLine').textContent = '无法获取报价（流动性不足或网络异常）';
+        document.getElementById('minLine').textContent = '';
+      } finally {
+        quoting = false; updateButton();
+      }
+    }
+    function updateQuoteLines() {
+      const amt = parseIn();
+      if (amt.isZero() || !lastAmountOut) {
+        document.getElementById('priceLine').textContent = '';
+        document.getElementById('minLine').textContent = '';
+        return;
+      }
+      const inNum = Number(ethers.utils.formatUnits(amt, curFrom().decimals));
+      const outNum = Number(ethers.utils.formatUnits(lastAmountOut, curTo().decimals));
+      const rate = outNum / inNum;
+      document.getElementById('priceLine').textContent = '1 ' + curFrom().symbol + ' ≈ ' + trimNum(rate.toFixed(8)) + ' ' + curTo().symbol;
+      document.getElementById('minLine').textContent = '滑点 ' + slippage + '% · 最少到账 ' + trimNum(ethers.utils.formatUnits(minOut(), curTo().decimals)) + ' ' + curTo().symbol;
+    }
+
+    /* ===== 链上读取：余额 / 授权 ===== */
+    async function refreshBalances() {
+      if (!account) { document.getElementById('balFrom').textContent = '--'; document.getElementById('balTo').textContent = '--'; return; }
+      try {
+        const f = new ethers.Contract(curFrom().address, ERC20_ABI, readProvider);
+        const t = new ethers.Contract(curTo().address, ERC20_ABI, readProvider);
+        const [bf, bt] = await Promise.all([f.balanceOf(account), t.balanceOf(account)]);
+        fromBal = bf;
+        document.getElementById('balFrom').textContent = trimNum(ethers.utils.formatUnits(bf, curFrom().decimals));
+        document.getElementById('balTo').textContent = trimNum(ethers.utils.formatUnits(bt, curTo().decimals));
+      } catch (e) { /* 静默 */ }
+    }
+    async function refreshAllowance() {
+      if (!account) { allowanceCache = ethers.constants.Zero; return; }
+      try {
+        const f = new ethers.Contract(curFrom().address, ERC20_ABI, readProvider);
+        allowanceCache = await f.allowance(account, ROUTER);
+      } catch (e) { allowanceCache = ethers.constants.Zero; }
+      updateButton();
+    }
+
+    /* ===== 交互：MAX / 切换 / 滑点 ===== */
+    function setMax() {
+      if (!account || !fromBal) { connectWallet(); return; }
+      document.getElementById('amountIn').value = ethers.utils.formatUnits(fromBal, curFrom().decimals);
+      onAmountInput();
+    }
+    function switchDir() {
+      fromKey = (fromKey === 'USDT') ? 'MDC' : 'USDT';
+      renderTokens();
+      document.getElementById('amountIn').value = '';
+      document.getElementById('amountOut').value = '';
+      lastAmountOut = null;
+      updateQuoteLines();
+      if (account) { refreshBalances(); refreshAllowance(); }
+      updateButton();
+    }
+    function setSlippage(v) {
+      slippage = v;
+      document.getElementById('slipCustom').value = '';
+      renderSlippage();
+      updateQuoteLines();
+      updateButton();
+    }
+    function onSlipCustom() {
+      const v = parseFloat(document.getElementById('slipCustom').value);
+      if (isNaN(v) || v <= 0 || v > 50) { return; }
+      slippage = v;
+      renderSlippage();
+      // 自定义时清除预设高亮（renderSlippage 已按值匹配；非预设值自动无高亮）
+      updateQuoteLines();
+      updateButton();
+    }
+
+    /* ===== 操作按钮状态机 ===== */
+    function updateButton() {
+      const btn = document.getElementById('actionBtn');
+      const amt = parseIn();
+      if (!account) { btn.textContent = '💎 连接钱包'; btn.disabled = false; btn.dataset.act = 'connect'; return; }
+      if (quoting) { btn.textContent = '⏳ 获取报价中...'; btn.disabled = true; btn.dataset.act = 'none'; return; }
+      if (amt.isZero()) { btn.textContent = '输入兑换数量'; btn.disabled = true; btn.dataset.act = 'none'; return; }
+      if (fromBal && amt.gt(fromBal)) { btn.textContent = curFrom().symbol + ' 余额不足'; btn.disabled = true; btn.dataset.act = 'none'; return; }
+      if (!lastAmountOut) { btn.textContent = '无法兑换'; btn.disabled = true; btn.dataset.act = 'none'; return; }
+      if (allowanceCache.lt(amt)) { btn.textContent = '授权 ' + curFrom().symbol; btn.disabled = false; btn.dataset.act = 'approve'; return; }
+      btn.textContent = '兑换 ' + curFrom().symbol + ' → ' + curTo().symbol; btn.disabled = false; btn.dataset.act = 'swap';
+    }
+    async function handleAction() {
+      const act = document.getElementById('actionBtn').dataset.act;
+      if (act === 'connect') return connectWallet();
+      if (act === 'approve') return doApprove();
+      if (act === 'swap') return doSwap();
+    }
+
+    /* ===== 授权 ===== */
+    async function doApprove() {
+      if (!signer) { await connectWallet(); if (!signer) return; }
+      const btn = document.getElementById('actionBtn');
+      try {
+        await ensureBSC();
+        const token = new ethers.Contract(curFrom().address, ERC20_ABI, signer);
+        btn.disabled = true; btn.textContent = '⏳ 等待授权确认...';
+        const tx = await token.approve(ROUTER, ethers.constants.MaxUint256);
+        btn.textContent = '⏳ 授权确认中...';
+        await tx.wait();
+        await refreshAllowance();
+        modal('✅', '授权成功', '已授权 PancakeSwap 路由使用你的 ' + curFrom().symbol + '，现在可以点击「兑换」完成交易。');
+      } catch (e) {
+        modal('⚠️', '授权未完成', parseErr(e));
+      } finally {
+        updateButton();
+      }
+    }
+
+    /* ===== 兑换 ===== */
+    async function doSwap() {
+      if (!signer) { await connectWallet(); if (!signer) return; }
+      const amt = parseIn();
+      if (amt.isZero() || !lastAmountOut) return;
+      const btn = document.getElementById('actionBtn');
+      try {
+        await ensureBSC();
+        const token = new ethers.Contract(curFrom().address, ERC20_ABI, signer);
+        // 余额校验
+        const bal = await token.balanceOf(account);
+        if (bal.lt(amt)) { modal('💰', curFrom().symbol + ' 余额不足', '当前余额不足以完成本次兑换，请减少数量后重试。'); return; }
+        // 授权校验
+        const allw = await token.allowance(account, ROUTER);
+        if (allw.lt(amt)) { allowanceCache = allw; updateButton(); modal('🔐', '需要先授权', '请先点击「授权 ' + curFrom().symbol + '」按钮完成授权后再兑换。'); return; }
+        const router = new ethers.Contract(ROUTER, ROUTER_ABI, signer);
+        const path = [curFrom().address, curTo().address];
+        const amountOutMin = minOut();
+        const deadline = Math.floor(Date.now() / 1000) + 1200; // 20 分钟
+        btn.disabled = true; btn.textContent = '⏳ 等待钱包确认...';
+        const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amt, amountOutMin, path, account, deadline);
+        btn.textContent = '⏳ 交易确认中...';
+        modal('⏳', '交易已提交', '正在等待区块确认，请稍候...<br><br>TX: ' + short(tx.hash));
+        await tx.wait();
+        modal('🎉', '兑换成功！', '已成功兑换 <b>' + curFrom().symbol + ' → ' + curTo().symbol + '</b>。<br><br><a href="https://bscscan.com/tx/' + tx.hash + '" target="_blank">在 BscScan 查看交易 ↗</a>');
+        document.getElementById('amountIn').value = '';
+        document.getElementById('amountOut').value = '';
+        lastAmountOut = null;
+        updateQuoteLines();
+        await refreshBalances();
+        await refreshAllowance();
+      } catch (e) {
+        modal('⚠️', '交易未完成', parseErr(e));
+      } finally {
+        updateButton();
+      }
+    }
+
+    /* ===== 钱包事件 ===== */
+    if (window.ethereum) {
+      window.ethereum.on && window.ethereum.on('accountsChanged', async (accs) => {
+        account = accs && accs[0] ? accs[0] : null;
+        if (account && window.ethereum) { provider = new ethers.providers.Web3Provider(window.ethereum); signer = provider.getSigner(); }
+        else { signer = null; }
+        updateWalletUI();
+        await refreshBalances();
+        await refreshAllowance();
+        updateButton();
+      });
+      window.ethereum.on && window.ethereum.on('chainChanged', () => location.reload());
+    }
+
+    /* ===== 初始化 ===== */
+    renderTokens();
+    renderSlippage();
+    updateButton();
+  </script>
+</body>
+</html>

@@ -287,6 +287,44 @@
       font-size: clamp(14px, 2.4vw, 16px); font-weight: 700; color: var(--gold-soft);
       background: linear-gradient(135deg, rgba(245,196,81,0.14), rgba(45,212,191,0.08)); border: 1px solid rgba(245,196,81,0.4);
     }
+
+    /* ===== 右侧弹出菜单导航（新增板块） ===== */
+    .menu-btn {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap;
+      padding: 10px 15px; border-radius: 11px; font-size: 13px; font-weight: 800;
+      color: #cbd5e1; border: 1px solid var(--line); background: rgba(255,255,255,0.04); transition: all .2s;
+    }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .menu-mask {
+      position: fixed; inset: 0; z-index: 900; background: rgba(3,5,9,0.6); backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .menu-mask.show { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; z-index: 1000; height: 100%; width: 300px; max-width: 84vw;
+      display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+      background: linear-gradient(180deg,#0a121e,#070b12); border-left: 1px solid rgba(45,212,191,0.2);
+      box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    }
+    .drawer.show { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+    .drawer-brand { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 15px; }
+    .drawer-brand .mark { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; }
+    .drawer-close { width: 36px; height: 36px; border-radius: 9px; border: none; background: transparent; color: #8a97ab; font-size: 24px; line-height: 1; cursor: pointer; }
+    .drawer-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+    .drawer-wallet { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .drawer-wallet .btn-wallet { width: 100%; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 14px 10px; }
+    .drawer-group { margin-bottom: 14px; }
+    .drawer-group-label { padding: 0 12px; margin-bottom: 5px; font-size: 11px; letter-spacing: 2px; color: #8a97ab; display: flex; align-items: center; gap: 6px; }
+    .drawer-link {
+      display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px;
+      font-size: 14px; font-weight: 700; color: #cbd5e1; text-decoration: none; margin-bottom: 3px; transition: all .2s;
+    }
+    .drawer-link:hover { background: rgba(45,212,191,0.1); color: #fff; }
+    .drawer-link .di { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .drawer-link .di svg { width: 20px; height: 20px; display: block; }
+    .drawer-foot { padding: 16px 18px; border-top: 1px solid var(--line); text-align: center; font-size: 11px; color: #5d6678; line-height: 1.7; }
   </style>
 </head>
 <body>
@@ -309,12 +347,50 @@
   </svg>
 
   <!-- 导航 -->
-  <nav class="nav">
+  <nav class="nav" id="top">
     <div class="brand"><span class="mark"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></span><span>MMC<span class="grad"> · 您的MDC理财工具</span></span></div>
     <div class="nav-actions">
       <button class="btn-wallet" id="walletBtn" onclick="connectWallet()">连接钱包</button>
+      <button class="menu-btn" onclick="openMenu()" aria-label="打开菜单">☰ 菜单</button>
     </div>
   </nav>
+
+  <!-- 右侧弹出菜单导航（新增板块） -->
+  <div class="menu-mask" id="menuMask" onclick="closeMenu()"></div>
+  <aside class="drawer" id="drawer" aria-label="导航菜单">
+    <div class="drawer-head">
+      <div class="drawer-brand"><span class="mark"><svg class="logo-ico"><use href="#mmcLogo"></use></svg></span><span>MMC<span class="grad"> · 导航</span></span></div>
+      <button class="drawer-close" onclick="closeMenu()" aria-label="关闭菜单">&times;</button>
+    </div>
+    <div class="drawer-wallet">
+      <button class="btn-wallet" id="walletBtn2" onclick="connectWallet()">💎 连接钱包</button>
+    </div>
+    <nav class="drawer-body">
+      <div class="drawer-group">
+        <div class="drawer-group-label">主页</div>
+        <a class="drawer-link" href="#top" onclick="goTop(event)"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>首页</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">交易</div>
+        <a class="drawer-link" href="swap.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>MDC SWAP 兑换</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">生态权益</div>
+        <a class="drawer-link" href="#shareholder" onclick="closeMenu()"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>初代矿主权益</span></a>
+        <a class="drawer-link" href="#cards" onclick="closeMenu()"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>创世卡牌权益</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">全球最新生态资料</div>
+        <a class="drawer-link" href="docs/mmc-whitepaper.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>项目白皮书</span></a>
+        <a class="drawer-link" href="docs/mmc-ppt.html"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>讲解课件</span></a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label">参与</div>
+        <a class="drawer-link" href="#join" onclick="closeMenu()"><span class="di"><svg><use href="#mmcLogo"></use></svg></span><span>如何参与</span></a>
+      </div>
+    </nav>
+    <div class="drawer-foot">© 2026 MMC · MDC社区共建<br>遇见造化 · 我命由我</div>
+  </aside>
 
   <!-- 水墨画卷 · 首页悬挂 -->
   <section class="ink-wrap">
@@ -390,7 +466,7 @@
 
         <div class="sh-action">
           <button class="btn-share" id="shareBtn" onclick="becomeShareholder()">🚀 立即申请初代矿主 · 挖 MMC 创世区块</button>
-          <div class="sh-note">点击按钮将通过你的 Web3 钱包自动向多签地址捐赠 500 USDT（BSC）申请初代矿主。每个地址限购一份，请确认网络为 BNB Smart Chain。</div>
+          <div class="sh-note">点击按钮将通过你的 Web3 钱包自动向 MDC 共建社区国库 捐赠 500 USDT（BSC）申请初代矿主。每个地址限购一份，请确认网络为 BNB Smart Chain。</div>
         </div>
       </div>
     </section>
@@ -418,7 +494,7 @@
             <li>MDC <b>全部到账</b></li>
             <li>MMC <b>70% 销毁</b></li>
             <li>MMC <b>20% 到账钱包</b></li>
-            <li>MMC <b>10% 进矿机池</b></li>
+            <li>MMC <b>10% 创世卡牌</b></li>
           </ul>
         </div>
       </div>
@@ -426,7 +502,7 @@
     </section>
 
     <!-- 资金分配 -->
-    <section class="block">
+    <section class="block" id="allocation">
       <div class="sec-head">
         <div class="sec-tag">FUND ALLOCATION</div>
         <div class="sec-title">资金 <span class="g">分配模型</span></div>
@@ -437,6 +513,21 @@
         <div class="pie-item"><div class="pie-pct">10%</div><div class="pie-d"><div class="pt">推荐奖励</div><div class="pd">6% 直推 + 4% 间推</div></div></div>
         <div class="pie-item"><div class="pie-pct">5%</div><div class="pie-d"><div class="pt">卡牌分红</div><div class="pd">回馈卡牌持有者</div></div></div>
       </div>
+    </section>
+
+    <!-- 创世卡牌权益 -->
+    <section class="block" id="cards">
+      <div class="sec-head">
+        <div class="sec-tag">GENESIS CARDS</div>
+        <div class="sec-title">创世 <span class="g">卡牌权益</span></div>
+        <div class="sec-desc">持有创世卡牌，享全生态三重分红 · 卡牌只能通过市场获取</div>
+      </div>
+      <div class="grid g3" style="margin-bottom:16px;">
+        <div class="card"><div class="ic">💵</div><div class="ct">进场分红 · 5% MDC</div><div class="cd">每笔进场入金，卡牌持有者按比例分得 <b>5% 的 MDC</b>。</div></div>
+        <div class="card"><div class="ic">💱</div><div class="ct">卖币分红 · 5% MMC</div><div class="cd">每笔卖币（MMC → MDC），卡牌持有者分得 <b>5% 的 MMC</b>。</div></div>
+        <div class="card"><div class="ic">🔓</div><div class="ct">撤 LP 分红 · 10% MMC</div><div class="cd">每笔撤出 LP，卡牌持有者分得 <b>10% 的 MMC</b>。</div></div>
+      </div>
+      <div class="sh-statement" style="margin-top:6px;">🃏 创世卡牌<b>不可铸造、不可申购</b>，<b>只能通过市场获取</b>，数量恒定、稀缺即价值。</div>
     </section>
 
     <!-- 矿机系统 -->
@@ -454,15 +545,13 @@
     </section>
 
     <!-- 参与方式 -->
-    <section class="block">
+    <section class="block" id="join">
       <div class="sec-head">
         <div class="sec-tag">HOW TO JOIN</div>
         <div class="sec-title">参与 <span class="g">方式</span></div>
       </div>
-      <div class="step"><span class="num">1</span><div><div class="st">入金</div><div class="sd"><b style="color:var(--gold)">持有 MDC 即可入金</b>完成封装，<b>MMC-LP 马上到账钱包</b>，一笔交易直接到账。</div></div></div>
-      <div class="step"><span class="num">2</span><div><div class="st">绑定</div><div class="sd">往下级地址转任意 MMC 即完成绑定关系。</div></div></div>
-      <div class="step"><span class="num">3</span><div><div class="st">参与</div><div class="sd">仅支持 MDC 参与，封装为 MMC-LP 后自动进入挖矿与分红。</div></div></div>
-      <div class="step" style="border-color:rgba(245,196,81,0.3);"><span class="num" style="background:linear-gradient(135deg,var(--gold),#f0a93a);">!</span><div><div class="st" style="color:var(--gold)">重要备注</div><div class="sd">入金后才能绑定，<b style="color:var(--gold)">未入金绑定的地址</b>将全部成为<b style="color:var(--gold)">黑洞地址</b>的下级，推荐奖励自动加入底池。</div></div></div>
+      <div class="step"><span class="num">1</span><div><div class="st">入金方式</div><div class="sd"><b style="color:var(--gold)">持有 MDC 或者 USDT</b>，在官网入金完成封装，<b>MMC-LP 马上到账钱包</b>，一笔交易直接到账。</div></div></div>
+      <div class="step"><span class="num">2</span><div><div class="st">提现方式</div><div class="sd">把 <b style="color:var(--gold)">MMC 或者 MMC-LP</b> 转进 MMC 的合约地址，<b>MDC 立即到账钱包</b>。</div></div></div>
     </section>
 
     <!-- 社区 -->
@@ -482,7 +571,7 @@
 
   <footer>
     © 2026 MMC · MDC社区共建　|　遇见造化 · 我命由我<br>
-    数字资产价格波动较大，参与前请充分了解机制与风险，量力而行。
+    官方最新生态共建 MDC 长久繁荣向上
   </footer>
 
   <!-- 弹窗 -->
@@ -526,6 +615,23 @@
     }
 
     function short(a) { return a.slice(0, 6) + '...' + a.slice(-4); }
+
+    /* 右侧弹出菜单 */
+    function openMenu() {
+      document.getElementById('drawer').classList.add('show');
+      document.getElementById('menuMask').classList.add('show');
+    }
+    function closeMenu() {
+      document.getElementById('drawer').classList.remove('show');
+      document.getElementById('menuMask').classList.remove('show');
+    }
+    function goTop(e) {
+      if (e) e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      closeMenu();
+    }
+    // ESC 关闭菜单
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeMenu(); });
 
     function copyText(text, btn) {
       const done = () => { const o = btn.textContent; btn.textContent = '已复制'; setTimeout(() => btn.textContent = o, 1500); };
@@ -572,6 +678,12 @@
       const btn = document.getElementById('walletBtn');
       if (account) { btn.textContent = short(account); btn.classList.add('connected'); }
       else { btn.textContent = '连接钱包'; btn.classList.remove('connected'); }
+      // 菜单内的钱包按钮同步状态
+      const btn2 = document.getElementById('walletBtn2');
+      if (btn2) {
+        if (account) { btn2.textContent = short(account); btn2.classList.add('connected'); }
+        else { btn2.textContent = '💎 连接钱包'; btn2.classList.remove('connected'); }
+      }
     }
 
     function refreshShareStatus() {
